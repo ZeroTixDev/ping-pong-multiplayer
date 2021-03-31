@@ -42,18 +42,56 @@ body {
 
 .rooms {
 	display: flex;
-	justify-content: center;
+	justify-content: baseline;
 	align-items: center;
 	flex-direction: column;
 	left: 10%;
 	top: 10%;
 	width: 80%;
 	height: 80%;
+	overflow-y: auto;
 	background-color: rgba(12, 9, 20, 0.4);
 }
 
+.room {
+	position: relative;
+	width: 100%;
+	background-color: rgba(0, 0, 0, 0);
+	transition: background-color 0.1s linear;
+	padding-top: 20px;
+	padding-bottom: 40px;
+	padding-right: 60px;
+	padding-left: 60px;
+	cursor: pointer;
+	font-size: 1rem;
+}
+
+.room-description {
+	position: absolute;
+	left: 100px;
+	top: 55px;
+}
+
+.room-player-count {
+	position: absolute;
+	right: 30px;
+	font-size: 1.6rem;
+	top: 30px;
+}
+
+.room-name {
+	font-weight: bold;
+	font-size: 1.5rem;
+}
+
+.room:hover {
+	background-color: rgba(11, 10, 20, 0.9);
+}
+
 .rooms .loader {
-	background-color: rgba(12, 9, 20, 0.4);
+	border: 15px solid rgba(12, 9, 20, 0.4);
+	border-bottom: 15px solid white;
+	border-right: 15px solid white;
 }
 
 .menu {
