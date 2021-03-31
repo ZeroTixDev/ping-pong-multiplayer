@@ -3,13 +3,115 @@
 require('./style.css');
 
 const ref = require('./references.js');
-const typingSpeed = 50;
-const gameDataWaitTime = 10;
-const gameData = {};
+const hash = require('../shared/hash.js');
+const typeWriter = require('./util/typeWriter.js');
+
+let rooms = null;
 
 window.addEventListener('load', () => {
    handleNetworkRequestsAndText();
 });
+
+ref.createButton.addEventListener('mousedown', () => {
+   ref.menu.classList.add('fade-out');
+   ref.menu.classList.remove('fade-in');
+   ref.menuMain.classList.add('fade-out');
+   ref.menu.addEventListener('transitionend', () => {
+      ref.menu.classList.remove('fade-out');
+      ref.menuMain.classList.add('hidden');
+      ref.menu.classList.add('fade-in');
+      ref.menuMain.classList.remove('fade-out');
+      ref.menuMain.classList.add('fade-in');
+      ref.createMenu.classList.remove('hidden');
+   });
+});
+
+ref.createRoomButton.addEventListener('mousedown', () => {
+   ref.menu.classList.add('fade-out');
+   ref.menu.classList.remove('fade-in');
+   ref.createMenu.classList.add('fade-out');
+   ref.menu.addEventListener('transitionend', () => {
+      ref.menu.classList.remove('fade-out');
+      ref.createMenu.classList.add('hidden');
+      ref.menu.classList.add('fade-in');
+      ref.createMenu.classList.remove('fade-out');
+      ref.createMenu.classList.add('fade-in');
+      ref.menuMain.classList.remove('hidden');
+   });
+});
+
+ref.privateCheckBox.addEventListener('click', () => {
+   const showPrivateSection = ref.privateCheckBox.checked;
+   if (showPrivateSection) {
+      if (ref.passwordSection.classList.contains('hidden')) {
+         ref.passwordSection.classList.remove('hidden');
+      }
+   } else {
+      if (!ref.passwordSection.classList.contains('hidden')) {
+         ref.passwordSection.classList.add('hidden');
+      }
+   }
+});
+
+ref.usernameBackButton.addEventListener('mousedown', () => {
+   ref.usernameOverlay.classList.add('hidden');
+   ref.usernameInput.value = '';
+});
+
+ref.privateBackButton.addEventListener('mousedown', () => {
+   ref.privateOverlay.classList.add('hidden');
+   ref.passwordInput.value = '';
+});
+
+function serverMessage(msg) {
+   // console.log(msg);
+   if (msg.type === 'rooms') {
+      const roomData = msg.data;
+      rooms = Object.create(null);
+      ref.roomDiv.innerHTML = '';
+      for (const room of roomData) {
+         rooms[room.id] = room;
+         ref.roomDiv.innerHTML += `
+   			<div class="room" id="${room.id}">
+					<span class="room-name">${room.name}${
+            room.private ? '&nbsp;&nbsp;<span style="color: red;">[PRIVATE]</span>' : ''
+         }</span>
+					<span class="room-description">${room.desc}</span>
+					<span class="room-player-count">${room.playerCount}/${room.maxPlayers}</span>
+				</div>
+   		`;
+      }
+      // attach listeners
+      for (const room of roomData) {
+         document.getElementById(`${room.id}`).addEventListener('mousedown', (event) => {
+            event.preventDefault();
+            if (room.private) {
+               ref.privateOverlay.classList.remove('hidden');
+               ref.passwordInput.focus();
+               ref.passwordInput.addEventListener('keydown', (event) => {
+                  if (event.key.toLowerCase() === 'enter') {
+                     send({ type: 'join', id: room.id, password: hash(ref.passwordInput.value) });
+                     ref.passwordInput.value = '';
+                  }
+               });
+            } else {
+               ref.usernameOverlay.classList.remove('hidden');
+               ref.usernameInput.focus();
+               ref.usernameInput.addEventListener('keydown', (event) => {
+                  if (event.key.toLowerCase() === 'enter') {
+                     send({ type: 'join', id: room.id });
+                     ref.usernameInput.value = '';
+                  }
+               });
+            }
+         });
+      }
+   }
+   if (msg.type === 'success') {
+      ref.menu.classList.add('hidden');
+      ref.game.classList.remove('hidden');
+   }
+}
 
 async function handleNetworkRequestsAndText() {
    return new Promise(async (resolve, reject) => {
@@ -22,7 +124,14 @@ async function handleNetworkRequestsAndText() {
       });
       window.ws.addEventListener('error', () => {
          window.socketStatus = 'error';
+         alert('The connection with the server has been lost');
       });
+
+      window.ws.addEventListener('message', (msg) => {
+         serverMessage(JSON.parse(msg.data));
+      });
+
+      window.send = (obj) => window.ws.send(JSON.stringify(obj));
 
       // check success
       let raf = null;
@@ -30,6 +139,7 @@ async function handleNetworkRequestsAndText() {
          let wrote = false;
          setTimeout(async () => {
             (async function run() {
+               raf = requestAnimationFrame(run);
                if (window.socketStatus != null) {
                   cancelAnimationFrame(raf);
                   if (!wrote && window.socketStatus === 'success') {
@@ -42,7 +152,6 @@ async function handleNetworkRequestsAndText() {
                      reject();
                   }
                }
-               raf = requestAnimationFrame(run);
             })();
          }, 200);
       }).then(() => {
@@ -53,28 +162,31 @@ async function handleNetworkRequestsAndText() {
             let time = 0;
             let lastTime = 0;
             let wrote = false;
+            const roomsWaitTime = 5;
+            send({ type: 'rooms' });
             setTimeout(async () => {
-               (async function run(now = 0) {
+               (async function check(now = 0) {
+                  raf = requestAnimationFrame(check);
                   time += (now - lastTime) / 1000;
                   lastTime = now;
-                  if (!wrote && gameData != null) {
+                  if (!wrote && rooms !== null) {
                      cancelAnimationFrame(raf);
                      wrote = true;
                      await typeWriter('Success!', ref.connectionText, 'span', 'style="color: #17e300;"');
                      resolve();
                      return;
-                  } else if (!wrote && gameData == null && time >= gameDataWaitTime) {
+                  }
+                  if (!wrote && rooms === null && time >= roomsWaitTime) {
                      cancelAnimationFrame(raf);
                      wrote = true;
                      await typeWriter('Failed', ref.connectionText, 'span', 'style="color: red;"');
                      reject();
                   }
-                  raf = requestAnimationFrame(run);
                })();
             }, 200);
          }).then(() => {
             ref.connectionText.innerHTML += '<br>';
-            typeWriter('Hacking haha0201 [JUST KIDDING] ...', ref.connectionText).then(() => {
+            typeWriter('Fetching room data...', ref.connectionText).then(() => {
                typeWriter('Success!', ref.connectionText, 'span', 'style="color: #17e300;"');
                ref.loading.classList.add('fade-out');
                ref.loading.addEventListener('transitionend', () => {
@@ -84,25 +196,5 @@ async function handleNetworkRequestsAndText() {
             });
          });
       });
-   });
-}
-
-async function typeWriter(text, element, elementType = null, styles = null) {
-   return new Promise((resolve, _reject) => {
-      function type(i = 0) {
-         if (i < text.length) {
-            if (elementType != null) {
-               element.innerHTML += `<${elementType} ${styles == null ? '' : styles}>${text.charAt(
-                  i
-               )}</${elementType}>`;
-            } else {
-               element.innerHTML += text.charAt(i);
-            }
-            setTimeout(() => type(i + 1), 1000 / typingSpeed);
-         } else {
-            resolve();
-         }
-      }
-      type();
    });
 }

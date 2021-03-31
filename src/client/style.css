@@ -12,11 +12,11 @@ body {
 
 .menu .title {
 	color: white;
-	font-size: 2rem;
+	font-size: 1.7rem;
 	position: absolute;
 	left: 0;
 	top: 0;
-	height: 75px;
+	height: 60px;
 	width: 100vw;
 	background-color: rgba(5, 4, 8, 0.4);
 	display: flex;
@@ -38,6 +38,25 @@ body {
 	align-items: center;
 	flex-direction: column;
 	padding: 20px;
+	transition: opacity 0.4s linear;
+}
+
+.create, .create-room {
+	position: relative;
+	left: 0;
+	margin: 10px;
+	padding: 20px;
+	font-size: 1.3rem;
+	padding-right: 80px;
+	padding-left: 80px;
+	background-color: rgba(5, 4, 8, 0.4);
+	color: white;
+	transition: background-color 0.1s linear;
+}
+
+
+.create:hover, .create-room:hover {
+	background-color: rgba(5, 4, 8, 0.8);
 }
 
 .rooms {
@@ -53,11 +72,39 @@ body {
 	background-color: rgba(12, 9, 20, 0.4);
 }
 
+.overlay {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100vw;
+	height: 100vh;
+	z-index: 500;
+	background-color: rgba(0, 0, 0, 0.95);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	user-select: none;
+}
+
+.back-button {
+	margin: 20px;
+	color: white;
+	font-size: 1rem;
+	background-color: #d40000;
+	border-radius: 6px;	
+	transition: background-color 0.05s linear;
+}
+
+.back-button:hover {
+	background-color: #4a0101;
+}
+
 .room {
 	position: relative;
 	width: 100%;
 	background-color: rgba(0, 0, 0, 0);
-	transition: background-color 0.1s linear;
+	transition: background-color 0.05s linear;
 	padding-top: 20px;
 	padding-bottom: 40px;
 	padding-right: 60px;
@@ -70,6 +117,7 @@ body {
 	position: absolute;
 	left: 100px;
 	top: 55px;
+	font-size: 1rem;
 }
 
 .room-player-count {
@@ -84,6 +132,10 @@ body {
 	font-size: 1.5rem;
 }
 
+.main h1 {
+	margin-top: 40px;
+}
+
 .room:hover {
 	background-color: rgba(11, 10, 20, 0.9);
 }
@@ -92,6 +144,16 @@ body {
 	border: 15px solid rgba(12, 9, 20, 0.4);
 	border-bottom: 15px solid white;
 	border-right: 15px solid white;
+}
+
+button {
+	position: relative;
+	padding: 20px;
+	padding-left: 60px;
+	padding-right: 60px;
+	border: none;
+	outline: none;
+	cursor: pointer;
 }
 
 .menu {
@@ -108,8 +170,85 @@ body {
 	min-height: 100vh;
 	min-width: 100vw;
 	opacity: 1;
+	transition: opacity 0.8s linear;
 	animation: fade-in 0.8s linear;
 }
+
+
+.switch {
+  display: inline-block;
+  height: 34px;
+  position: relative;
+  width: 60px;
+}
+
+.switch input {
+  display:none;
+}
+
+.create-menu .sec {
+	display: flex;
+	padding: 5px;
+	justify-content: center;
+	align-items: center;
+	margin: 1px;
+}
+
+input {
+	border: none;
+	outline: none;
+	border-radius: 2px;
+	padding: 5px;
+	color: black;
+	font-weight: 550;
+	position: relative;
+	font-size: 1.5rem;
+}
+
+.text {
+	margin: 20px;
+	color: white;
+	font-size: 1.5rem;
+}
+
+.slider {
+  background-color: #ccc;
+  bottom: 0;
+  cursor: pointer;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: .4s;
+}
+
+.slider:before {
+  background-color: #fff;
+  bottom: 4px;
+  content: "";
+  height: 26px;
+  left: 4px;
+  position: absolute;
+  transition: .4s;
+  width: 26px;
+}
+
+input:checked + .slider {
+  background-color: red;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
 
 @keyframes fade-in {
 	0% {
@@ -131,6 +270,9 @@ body {
 
 .fade-out {
 	opacity: 0;
+}
+.fade-in {
+	opacity: 1;
 }
 
 .loading  {

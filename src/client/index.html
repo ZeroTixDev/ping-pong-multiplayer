@@ -15,30 +15,52 @@
   		</div>
   		<div class="menu hidden">
   			<h1 class="title">Ping Pong</h1>
+  			<div id="username-overlay" class="overlay hidden">
+  				<span class="text">Username </span>
+  				<input class="username-input" type="text" autocomplete="off" spellcheck="false" maxlength="16">
+  				<button class="back-button" id="username-back-button">Back</button>
+  			</div>
+  			<div id="password-overlay" class="overlay hidden">
+  				<span class="text">Room password </span>
+  				<input class="password-input" type="text" autocomplete="off" spellcheck="false" maxlength="20">
+  				<button class="back-button" id="password-back-button">Back</button>
+  			</div>
   			<div class="main">
   				<h1>Rooms</h1>
-  				<div class="rooms">
-  					<div class="room">
-  						<span class="room-name">Testing Room</span>
-  						<span class="room-description">Im testing rooms, be sure to join</span>
-  						<span class="room-player-count">5/10</span>
-  					</div>
-  					<div class="room">
-  						<span class="room-name">Main Lobby</span>
-  						<span class="room-description">Quickplay</span>
-  						<span class="room-player-count">0/10</span>
-  					</div>
-  					<div class="room">
-  						<span class="room-name">Noobs</span>
-  						<span class="room-description">hahahah noob joins here lol</span>
-  						<span class="room-player-count">5/10</span>
-  					</div>
-  					<!-- <div class="loader"></div> -->
+  				<div class="rooms"></div>
+  				<button class="create">or Create</button>
+  			</div>
+  			<div class="create-menu hidden">
+  				<div class="private sec">
+  					<span class="text">Private</span>
+	  				<label class="switch" for="private-checkbox">
+				     <input type="checkbox" id="private-checkbox" />
+				     <div class="slider round"></div>
+				   </label>
+  				</div>
+  				<div class="server-name sec">
+  					<span class="text">Room Name </span>
+  					<input class="server-name-input" type="text" autocomplete="off" spellcheck="false" maxlength="20">
+  				</div>
+  				<div class="server-desc sec">
+  					<span class="text">Description </span>
+  					<input class="server-desc-input" type="text" autocomplete="off" spellcheck="false" maxlength="30">
+  				</div>
+  				<div class="server-username sec">
+  					<span class="text">Username </span>
+  					<input class="server-username-input" type="text" autocomplete="off" spellcheck="false" maxlength="16">
+  				</div>
+  				<div class="server-password sec hidden">
+  					<span class="text">Password </span>
+  					<input class="server-password-input" type="text" autocomplete="off" spellcheck="false" maxlength="20">
+  				</div>
+  				<div class="create-room-div sec">
+  					<button class="create-room">Create</button>
   				</div>
   			</div>
   		</div>
-  		<div class="lobby hidden">
-
+  		<div class="game hidden">
+  			im in the game
   		</div>
   </body>
 </html>
