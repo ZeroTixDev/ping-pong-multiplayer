@@ -7,6 +7,7 @@ body {
 	font-size:16px;
 	font-family: 'Lexend', sans-serif;
 	background-color: #15131c;
+	user-select: none;
 }
 
 .menu .title {
@@ -23,13 +24,36 @@ body {
 	align-items: center;
 }
 
+
+
 .menu .main {
-	background-color: rgba(25, 20, 38, 0.4);
+	background-color: rgba(0, 0, 0, 0);
 	position: absolute;
-	left: 100px;
-	top: 75px;
-	width: calc(100vw - 200px);
-	height: calc(100vh - 75px);
+	left: 50px;
+	top: 50px;
+	width: calc(100vw - 100px);
+	height: calc(100vh - 100px);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	padding: 20px;
+}
+
+.rooms {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	left: 10%;
+	top: 10%;
+	width: 80%;
+	height: 80%;
+	background-color: rgba(12, 9, 20, 0.4);
+}
+
+.rooms .loader {
+	background-color: rgba(12, 9, 20, 0.4);
 }
 
 .menu {
@@ -84,9 +108,12 @@ body {
 	transition: opacity 0.7s linear;
 }
 
+.loading .loader {
+	margin-top: 100px;
+}
+
 .loader{
 	position: absolute;
-	margin-top: 100px;
 	width: 100px;
 	height: 100px;
 	border-radius:50%;
