@@ -38,7 +38,7 @@ body {
 	align-items: center;
 	flex-direction: column;
 	padding: 20px;
-	transition: opacity 0.4s linear;
+	transition: opacity 0.3s linear;
 }
 
 .create, .create-room {
@@ -91,8 +91,9 @@ body {
 	margin: 20px;
 	color: white;
 	font-size: 1rem;
+	font-weight: bold;
 	background-color: #d40000;
-	border-radius: 6px;	
+	border-radius: 6px;
 	transition: background-color 0.05s linear;
 }
 
@@ -170,8 +171,8 @@ button {
 	min-height: 100vh;
 	min-width: 100vw;
 	opacity: 1;
-	transition: opacity 0.8s linear;
-	animation: fade-in 0.8s linear;
+	transition: opacity 0.3s linear;
+	animation: fade-in 0.3s linear;
 }
 
 
@@ -259,6 +260,83 @@ input:checked + .slider:before {
 	}
 }
 
+.chat {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: #383E53;
+	overflow: hidden;
+}
+
+.my-message {
+	color: white !important;
+}
+
+.chat-message {
+	font-size: 1.2rem;
+	margin: 2px;
+	color: white;
+}
+
+
+.chat-div {
+	background-color: #312D4A;
+	position: absolute;
+	left: 0;
+	top: 60vh;
+	height: 40vh;
+	width: 100vw;
+	z-index: 500;
+}
+
+.ready {
+	position: absolute;
+	right: 0;
+	top: 0;
+	background-color: #069157;
+	transition: background-color 0.15s linear;
+	font-size: 1.5rem;
+	font-weight: bold;
+	color: white;
+	border-radius: 2px;
+	padding-left: 40px;
+	padding-right: 40px;
+}
+
+.author::after {
+	content: ': ';
+}
+
+.author {
+	color: rgb(180, 180, 180);
+}
+
+.chat-messages {
+	width: calc(100vw - 200px);
+	height: calc(100vh - 60vh - 45px);
+	overflow-y: auto;
+}
+
+.ready:hover {
+	background-color: #0db870;
+}
+
+.chat-div .chat-input {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	background-color: rgba(38, 37, 76, 1);
+	width: 100vw;
+	height: 45px;
+	border: none;
+	outline: none;
+	color: white;
+}
+
+
+
 .connection-text {
 	color: white;
 	font-size: 1.2rem;
@@ -285,7 +363,7 @@ input:checked + .slider:before {
 	top: 0;
 	min-width: 100vw;
 	min-height: 100vh;
-	transition: opacity 0.7s linear;
+	transition: opacity 0.3s linear;
 }
 
 .loading .loader {

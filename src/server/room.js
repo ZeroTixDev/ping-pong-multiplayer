@@ -8,7 +8,8 @@ module.exports = class Room {
       this.id = id;
       this.name = data.name;
       this.desc = data.desc;
-      this.private = data.private ?? false;
+      this.host = data.host || null;
+      this.private = data.private || false;
       this.maxPlayers = data.maxPlayers;
       this._password = this.private ? hash(data.password) : null;
       this.state = null;
@@ -43,11 +44,5 @@ id: {
 	private: bool,
 	_password: string,
 	state: string,
-	...stateData,
-	players: [
-		{
-			...gameData	
-		}
-	]
-}
+	...stateData,}
 */

@@ -5,6 +5,7 @@ module.exports = class Client {
       this.id = id;
       this.socket = socket;
       this.state = 'connecting';
+      this.password = null;
       /* possible states
 			- connecting
 			- game-menu

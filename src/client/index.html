@@ -9,7 +9,7 @@
   </head>
 
   <body oncontextmenu="return false">
-  		<div class="loading">
+  		<div class="loading hidden">
   			<div class="connection-text"></div>
   			<div class="loader"></div>
   		</div>
@@ -56,11 +56,19 @@
   				</div>
   				<div class="create-room-div sec">
   					<button class="create-room">Create</button>
+  					<button class="back-button" id="create-back-button">or Back</button>
   				</div>
   			</div>
   		</div>
-  		<div class="game hidden">
-  			im in the game
+  		<div class="chat">
+			<div class="chat-div">
+				<div class="chat-messages">
+					<div class="chat-message"><span class="author my-message">ZeroTix</span><span class="message">WOW this chat is REALLY cool</span></div>
+					<div class="chat-message"><span class="author">ZeroTix</span><span class="message">Yep this chat IS cool</span></div>
+				</div>
+				<input class="chat-input" type="text" autocomplete="off" spellcheck="false" maxlength="150" autofocus>
+				<button class="ready">Ready</button>
+			</div>
   		</div>
   </body>
-</html>
+</html>	

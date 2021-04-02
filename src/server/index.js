@@ -9,7 +9,7 @@ const Room = require('./room.js');
 
 const wss = new WebSocket.Server({ noServer: true });
 const app = express();
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 8080;
 const server = app.listen(PORT, () => console.log(`[Server]: Listening on ${PORT}`));
 
 app.get('/', (request, result) => {
@@ -32,16 +32,19 @@ const clients = Object.create(null);
 
 const state = State();
 
-console.log(state.rooms);
-
-wss.on('connection', (socket, request) => {
+// eslint-disable-next-line no-unused-vars
+wss.on('connection', (socket, _request) => {
    const clientId = uniqueId(Object.keys(clients));
    clients[clientId] = new Client(clientId, socket);
 
    console.log('new client', clientId);
 
    socket.on('message', (data) => {
-      newMessage({ data: JSON.parse(data), id: clientId });
+      try {
+         newMessage({ data: JSON.parse(data), id: clientId });
+      } catch (e) {
+         console.log(e);
+      }
    });
 
    socket.on('close', () => {
@@ -50,13 +53,12 @@ wss.on('connection', (socket, request) => {
          const room = state.rooms[clients[clientId].roomId];
          if (room !== undefined) {
             room.removePlayer(clientId);
-            state.roomUpdate = true;
+            if (clients[clientId].id === room.host) {
+               removeRoom(room.id);
+            }
          }
       }
       delete clients[clientId];
-   });
-   socket.on('limited', () => {
-      console.log('player is rate limited!!');
    });
 });
 
@@ -74,6 +76,7 @@ setInterval(() => {
 function addRoom(data, id) {
    state.rooms[id] = new Room(data, id);
    state.roomUpdate = true;
+   return state.rooms[id];
 }
 
 function removeRoom(id) {
@@ -94,22 +97,35 @@ function newMessage({ data, id }) {
       if (
          data.password !== undefined &&
          room.private &&
-         room._password === data.password &&
-         room.playerCount + 1 <= room.maxPlayers
+         room.playerCount + 1 <= room.maxPlayers &&
+         data.password === room._password
       ) {
-         console.log('player joined and did right password');
-         room.addPlayer(client);
-         client.enterGame(room.id);
-         client.send({ type: 'success' });
-         state.roomUpdate = true;
+         console.log('player did right password');
+         client.password = data.password;
+         client.send({ type: 'password-right' });
       }
-      if (data.password === undefined && !room.private && room.playerCount + 1 <= room.maxPlayers) {
-         console.log('player joined public lobby');
-         room.addPlayer(client);
-         client.enterGame(room.id);
-         client.send({ type: 'success' });
-         state.roomUpdate = true;
+      if (data.password === undefined && room.playerCount + 1 <= room.maxPlayers) {
+         if ((room.private && client.password !== null && client.password === room._password) || !room.private) {
+            console.log('player joined lobby');
+            room.addPlayer(client);
+            client.enterGame(room.id);
+            client.send({ type: 'success' });
+         }
       }
+   }
+   if (data.type === 'create-room' && client.state === 'game-menu') {
+      const room = addRoom({
+         name: data.name,
+         desc: data.desc,
+         maxPlayers: 2,
+         private: data.private,
+         state: 'chat',
+         password: data.password,
+         host: client.id,
+      });
+      room.addPlayer(client);
+      client.enterGame(room.id);
+      client.send({ type: 'success' });
    }
 }
 
@@ -156,7 +172,6 @@ addRoom(
       name: 'Testing room',
       desc: 'Dev Room Testing',
       maxPlayers: 2,
-      private: false,
       state: 'chat',
       players: [],
       private: true,
@@ -170,7 +185,6 @@ addRoom(
       name: 'Noobs',
       desc: 'A lobby for noobs!',
       maxPlayers: 2,
-      private: false,
       state: 'chat',
       players: [],
       private: false,
