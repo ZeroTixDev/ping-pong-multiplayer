@@ -8,10 +8,10 @@ const typeWriter = require('./util/typeWriter.js');
 
 let rooms = null;
 let roomId = null;
-let state = 'chat'; // THIS IS NULL
+let state = null; // THIS IS NULL
 
 window.addEventListener('load', () => {
-   // handleNetworkRequestsAndText();
+   handleNetworkRequestsAndText();
 });
 
 window.addEventListener('keydown', (event) => {
@@ -35,17 +35,6 @@ ref.createButton.addEventListener('mousedown', () => {
 });
 
 ref.createRoomButton.addEventListener('mousedown', () => {
-   // ref.menu.classList.add('fade-out');
-   // ref.menu.classList.remove('fade-in');
-   // ref.createMenu.classList.add('fade-out');
-   // ref.menu.addEventListener('transitionend', () => {
-   //    ref.menu.classList.remove('fade-out');
-   //    ref.createMenu.classList.add('hidden');
-   //    ref.menu.classList.add('fade-in');
-   //    ref.createMenu.classList.remove('fade-out');
-   //    ref.createMenu.classList.add('fade-in');
-   //    ref.menuMain.classList.remove('hidden');
-   // });
    send({
       type: 'create-room',
       name: ref.serverNameInput.value,

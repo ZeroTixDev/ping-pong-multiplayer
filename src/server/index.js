@@ -113,7 +113,7 @@ function newMessage({ data, id }) {
          }
       }
    }
-   if (data.type === 'create-room' && client.state === 'game-menu') {
+   if (data.type === 'create-room' && client.state === 'game-menu' && validRoomData(data)) {
       const room = addRoom({
          name: data.name,
          desc: data.desc,
@@ -127,6 +127,16 @@ function newMessage({ data, id }) {
       client.enterGame(room.id);
       client.send({ type: 'success' });
    }
+}
+
+function validRoomData(data) {
+   if (!whiteSpaceTest(data.name)) return false;
+   if (!whiteSpaceTest(data.desc)) return false;
+   return true;
+}
+
+function whiteSpaceTest(string) {
+   return /\S/.test(string);
 }
 
 function State() {
