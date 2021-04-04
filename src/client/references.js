@@ -28,4 +28,5 @@ module.exports = {
    playerCount: document.querySelector('.player-count'),
    chatMessages: document.querySelector('.chat-messages'),
    leaveButton: document.querySelector('.leave'),
+   roomTitle: document.querySelector('.room-title'),
 };

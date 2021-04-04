@@ -15,6 +15,9 @@ module.exports = class Client {
    inGameMenu() {
       this.state = 'game-menu';
    }
+   inConnecting() {
+      this.state = 'connecting';
+   }
    enterGame(id) {
       this.state = 'in-game';
       this.roomId = id;

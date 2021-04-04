@@ -36,9 +36,10 @@ ref.leaveButton.addEventListener('mousedown', () => {
    if (state === 'chat') {
       console.log('requesting to leave');
       send({ type: 'leave-room' });
+      ref.chatMessages.innerHTML = `<div class="chat-message"><span class="my-message"><h1>Chat</h1></span></div>`;
       ref.chat.classList.add('fade-out');
       ref.chat.classList.remove('fade-in');
-      ref.chat.addEventListener('transitionend', () => {
+      ref.chat.addEventListener('transitionend', function handle() {
          ref.chat.classList.remove('fade-out');
          ref.chat.classList.add('hidden');
          ref.menu.classList.add('fade-in');
@@ -47,6 +48,8 @@ ref.leaveButton.addEventListener('mousedown', () => {
          ref.usernameOverlay.classList.add('hidden');
          ref.roomDiv.innerHTML = '<div class="center"><div class="loader"></div></div>';
          state = null;
+         send({ type: 'rooms' });
+         ref.chat.removeEventListener('transitionend', handle);
       });
    }
 });
@@ -55,13 +58,14 @@ ref.createButton.addEventListener('mousedown', () => {
    ref.menu.classList.add('fade-out');
    ref.menu.classList.remove('fade-in');
    ref.menuMain.classList.add('fade-out');
-   ref.menu.addEventListener('transitionend', () => {
+   ref.menu.addEventListener('transitionend', function handle() {
       ref.menu.classList.remove('fade-out');
       ref.menuMain.classList.add('hidden');
       ref.menu.classList.add('fade-in');
       ref.menuMain.classList.remove('fade-out');
       ref.menuMain.classList.add('fade-in');
       ref.createMenu.classList.remove('hidden');
+      ref.menu.removeEventListener('transitionend', handle);
    });
 });
 
@@ -72,6 +76,7 @@ ref.createRoomButton.addEventListener('mousedown', () => {
       desc: ref.serverDescInput.value,
       private: ref.privateCheckBox.checked,
       password: ref.serverPasswordInput.value,
+      username: ref.serverUsernameInput.value,
    });
 });
 
@@ -119,13 +124,14 @@ ref.createBackButton.addEventListener('mousedown', () => {
    ref.menu.classList.add('fade-out');
    ref.menu.classList.remove('fade-in');
    ref.createMenu.classList.add('fade-out');
-   ref.menu.addEventListener('transitionend', () => {
+   ref.menu.addEventListener('transitionend', function handle() {
       ref.menu.classList.remove('fade-out');
       ref.createMenu.classList.add('hidden');
       ref.menu.classList.add('fade-in');
       ref.createMenu.classList.remove('fade-out');
       ref.createMenu.classList.add('fade-in');
       ref.menuMain.classList.remove('hidden');
+      ref.menu.removeEventListener('transitionend', handle);
    });
 });
 
@@ -138,6 +144,7 @@ function serverMessage(msg) {
       game.maxPlayers = roomData.maxPlayers;
       game.players = roomData.players;
       game.room.name = roomData.room.name;
+      ref.roomTitle.innerText = game.room.name;
    }
    if (msg.type === 'chat-update') {
       const messages = msg.messages;
@@ -180,27 +187,29 @@ function serverMessage(msg) {
                if (room.private) {
                   ref.privateOverlay.classList.remove('hidden');
                   ref.passwordInput.focus();
-                  ref.passwordInput.addEventListener('keydown', (event) => {
+                  ref.passwordInput.addEventListener('keydown', function handle(event) {
                      roomId = room.id;
                      if (event.key.toLowerCase() === 'enter' && /\S/.test(ref.passwordInput.value)) {
                         send({ type: 'join', id: roomId, password: hash(ref.passwordInput.value) });
                         ref.passwordInput.value = '';
+                        ref.passwordInput.removeEventListener('keydown', handle);
                      }
                   });
                } else {
                   ref.usernameOverlay.classList.remove('hidden');
                   ref.usernameInput.focus();
-                  ref.usernameInput.addEventListener('keydown', (event) => {
+                  ref.usernameInput.addEventListener('keydown', function handle(event) {
                      roomId = room.id;
                      if (event.key.toLowerCase() === 'enter' && /\S/.test(ref.usernameInput.value)) {
                         send({ type: 'join', id: roomId, username: ref.usernameInput.value });
                         ref.usernameInput.value = '';
+                        ref.usernameInput.removeEventListener('keydown', handle);
                      }
                   });
                }
             });
          }
-      }, 1000);
+      }, 750);
    }
    if (msg.type === 'password-right') {
       ref.privateOverlay.classList.add('hidden');
@@ -220,6 +229,7 @@ function serverMessage(msg) {
       state = 'chat';
       selfId = msg.selfId;
       game = msg.initPack;
+      ref.roomTitle.innerText = game.room.name;
       console.log(game);
       ref.chatInput.focus();
    }
@@ -301,9 +311,10 @@ async function handleNetworkRequestsAndText() {
             typeWriter('Fetching room data...', ref.connectionText).then(() => {
                typeWriter('Success!', ref.connectionText, 'span', 'style="color: #17e300;"');
                ref.loading.classList.add('fade-out');
-               ref.loading.addEventListener('transitionend', () => {
+               ref.loading.addEventListener('transitionend', function handle() {
                   ref.loading.classList.add('hidden');
                   ref.menu.classList.remove('hidden');
+                  ref.loading.removeEventListener('transitionend', handle);
                });
             });
          });

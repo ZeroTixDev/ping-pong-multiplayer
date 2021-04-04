@@ -73,7 +73,7 @@ setInterval(() => {
          if (client.state === 'game-menu') {
             client.send({ type: 'rooms', data: Object.values(roomData) });
          }
-         if (client.state === 'in-game' && state.rooms[client.roomId].update) {
+         if (client.state === 'in-game' && state.rooms[client.roomId] && state.rooms[client.roomId].update) {
             client.send({ type: 'my-room-update', data: state.rooms[client.roomId].updatePack() });
          }
       }
@@ -127,9 +127,7 @@ function newMessage({ data, id }) {
             removeRoom(room.id);
          }
       }
-      client.send({ type: 'rooms', data: Object.values(state.packRooms()) });
-      client.inGameMenu(); // changes state to being in game menu
-      console.log('sent room data');
+      client.inConnecting(); // changes state to being in game menu
    }
    if (data.type === 'chat' && client.state === 'in-game') {
       state.rooms[client.roomId].talk(client.id, removeTags(data.content));
@@ -167,9 +165,10 @@ function newMessage({ data, id }) {
          password: data.password,
          host: client.id,
       });
+      client.username = removeTags(data.username) || '';
       room.addPlayer(client);
       client.enterGame(room.id);
-      client.send({ type: 'success', selfId: client.id, initPcak: room.initPack() });
+      client.send({ type: 'success', selfId: client.id, initPack: room.initPack() });
    }
 }
 
@@ -214,7 +213,7 @@ addRoom(
 addRoom(
    {
       name: 'Testing room',
-      desc: 'Dev Room Testing',
+      desc: 'Room Testing hehe',
       maxPlayers: 2,
       state: 'chat',
       players: [],
@@ -232,6 +231,32 @@ addRoom(
       state: 'chat',
       players: [],
       private: false,
+   },
+   uniqueId(Object.keys(state.rooms))
+);
+
+addRoom(
+   {
+      name: 'Dev room',
+      desc: 'Dev Room :)',
+      maxPlayers: 2,
+      state: 'chat',
+      players: [],
+      private: true,
+      password: 'dev!!',
+   },
+   uniqueId(Object.keys(state.rooms))
+);
+
+addRoom(
+   {
+      name: 'password is nothing',
+      desc: 'there is no password haha',
+      maxPlayers: 2,
+      state: 'chat',
+      players: [],
+      private: true,
+      password: 'nothing',
    },
    uniqueId(Object.keys(state.rooms))
 );
