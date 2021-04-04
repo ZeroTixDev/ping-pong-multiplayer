@@ -10,7 +10,8 @@
     "prod": "npm-run-all --parallel server prod-client",
     "prod-client": "webpack --config config/webpack.prod.js --watch",
     "dev": "npm-run-all --parallel server dev-client",
-    "dev-client": "webpack --config config/webpack.dev.js --watch"
+    "dev-client": "webpack --config config/webpack.dev.js --watch",
+    "push": "webpack --config config/webpack.prod.js && git add ."
   },
   "keywords": [],
   "author": "ZeroTix",

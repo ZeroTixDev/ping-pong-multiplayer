@@ -8,6 +8,8 @@ const typeWriter = require('./util/typeWriter.js');
 
 let rooms = null;
 let roomId = null;
+let selfId = null;
+let game = null;
 let state = null; // THIS IS NULL
 
 window.addEventListener('load', () => {
@@ -17,6 +19,35 @@ window.addEventListener('load', () => {
 window.addEventListener('keydown', (event) => {
    if (state === 'chat' && document.activeElement !== ref.chatInput && event.code.toLowerCase() === 'enter') {
       ref.chatInput.focus();
+   }
+});
+
+ref.chatInput.addEventListener('keydown', (event) => {
+   if (state !== 'chat') return ref.chatInput.blur();
+   if (event.key.toLowerCase() === 'enter' && /\S/.test(ref.chatInput.value)) {
+      // send to server
+      send({ type: 'chat', content: ref.chatInput.value });
+      ref.chatInput.value = '';
+   }
+});
+
+ref.leaveButton.addEventListener('mousedown', () => {
+   console.log('clicked leave, state ->', state);
+   if (state === 'chat') {
+      console.log('requesting to leave');
+      send({ type: 'leave-room' });
+      ref.chat.classList.add('fade-out');
+      ref.chat.classList.remove('fade-in');
+      ref.chat.addEventListener('transitionend', () => {
+         ref.chat.classList.remove('fade-out');
+         ref.chat.classList.add('hidden');
+         ref.menu.classList.add('fade-in');
+         ref.menu.classList.remove('hidden');
+         ref.menuMain.classList.remove('hidden');
+         ref.usernameOverlay.classList.add('hidden');
+         ref.roomDiv.innerHTML = '<div class="center"><div class="loader"></div></div>';
+         state = null;
+      });
    }
 });
 
@@ -57,12 +88,22 @@ ref.privateCheckBox.addEventListener('click', () => {
    }
 });
 
-ref.usernameBackButton.addEventListener('mousedown', () => {
+ref.usernameEnterButton.addEventListener('mousedown', () => {
+   send({ type: 'join', id: roomId, username: ref.usernameInput.value });
+   ref.usernameInput.value = '';
+});
+
+ref.privateEnterButton.addEventListener('mousedown', () => {
+   send({ type: 'join', id: roomId, password: hash(ref.passwordInput.value) });
+   ref.passwordInput.value = '';
+});
+
+ref.usernameOverlay.addEventListener('mousedown', () => {
    ref.usernameOverlay.classList.add('hidden');
    ref.usernameInput.value = '';
 });
 
-ref.privateBackButton.addEventListener('mousedown', () => {
+ref.privateOverlay.addEventListener('mousedown', () => {
    ref.privateOverlay.classList.add('hidden');
    ref.passwordInput.value = '';
 });
@@ -89,50 +130,77 @@ ref.createBackButton.addEventListener('mousedown', () => {
 });
 
 function serverMessage(msg) {
-   // console.log(msg);
-   if (msg.type === 'rooms') {
+   console.log(msg);
+   if (msg.type === 'my-room-update') {
       const roomData = msg.data;
-      rooms = Object.create(null);
-      ref.roomDiv.innerHTML = '';
-      for (const room of roomData) {
-         rooms[room.id] = room;
-         ref.roomDiv.innerHTML += `
-   			<div class="room" id="${room.id}">
-					<span class="room-name">${room.name}${
-            room.private ? '&nbsp;&nbsp;<span style="color: red;">[PRIVATE]</span>' : ''
-         }</span>
-					<span class="room-description">${room.desc}</span>
-					<span class="room-player-count">${room.playerCount}/${room.maxPlayers}</span>
-				</div>
-   		`;
+      ref.playerCount.innerText = `${roomData.playerCount} / ${roomData.maxPlayers}`;
+      game.playerCount = roomData.playerCount;
+      game.maxPlayers = roomData.maxPlayers;
+      game.players = roomData.players;
+      game.room.name = roomData.room.name;
+   }
+   if (msg.type === 'chat-update') {
+      const messages = msg.messages;
+      const isScrolledToBottom =
+         ref.chatMessages.scrollHeight - ref.chatMessages.clientHeight <= ref.chatMessages.scrollTop + 1;
+      for (const { author, content } of messages) {
+         ref.chatMessages.innerHTML += `
+         <div class="chat-message">
+         	<span class="author ${author === selfId ? 'my-message' : ''}">${game.players[author].name}</span>
+         	<span class="message">${content}</span>
+         </div>
+         `;
       }
-      // attach listeners
-      for (const room of roomData) {
-         document.getElementById(`${room.id}`).addEventListener('mousedown', (event) => {
-            event.preventDefault();
-            if (room.private) {
-               ref.privateOverlay.classList.remove('hidden');
-               ref.passwordInput.focus();
-               ref.passwordInput.addEventListener('keydown', (event) => {
-                  if (event.key.toLowerCase() === 'enter' && /\S/.test(ref.passwordInput.value)) {
-                     roomId = room.id;
-                     send({ type: 'join', id: room.id, password: hash(ref.passwordInput.value) });
-                     ref.passwordInput.value = '';
-                  }
-               });
-            } else {
-               ref.usernameOverlay.classList.remove('hidden');
-               ref.usernameInput.focus();
-               ref.usernameInput.addEventListener('keydown', (event) => {
-                  if (event.key.toLowerCase() === 'enter' && /\S/.test(ref.usernameInput.value)) {
-                     roomId = room.id;
-                     send({ type: 'join', id: room.id, username: ref.usernameInput.value });
-                     ref.usernameInput.value = '';
-                  }
-               });
-            }
-         });
+      if (isScrolledToBottom) {
+         ref.chatMessages.scrollTop = ref.chatMessages.scrollHeight - ref.chatMessages.clientHeight;
       }
+   }
+   if (msg.type === 'rooms') {
+      setTimeout(() => {
+         console.log('got room data');
+         const roomData = msg.data;
+         rooms = Object.create(null);
+         ref.roomDiv.innerHTML = '';
+         for (const room of roomData) {
+            rooms[room.id] = room;
+            ref.roomDiv.innerHTML += `
+	   			<div class="room" id="${room.id}">
+						<span class="room-name">${room.name}${
+               room.private ? '&nbsp;&nbsp;<span style="color: red;">[PRIVATE]</span>' : ''
+            }</span>
+						<span class="room-description">${room.desc}</span>
+						<span class="room-player-count">${room.playerCount}/${room.maxPlayers}</span>
+					</div>
+	   		`;
+         }
+         // attach listeners
+         for (const room of roomData) {
+            document.getElementById(`${room.id}`).addEventListener('mousedown', (event) => {
+               event.preventDefault();
+               if (room.private) {
+                  ref.privateOverlay.classList.remove('hidden');
+                  ref.passwordInput.focus();
+                  ref.passwordInput.addEventListener('keydown', (event) => {
+                     roomId = room.id;
+                     if (event.key.toLowerCase() === 'enter' && /\S/.test(ref.passwordInput.value)) {
+                        send({ type: 'join', id: roomId, password: hash(ref.passwordInput.value) });
+                        ref.passwordInput.value = '';
+                     }
+                  });
+               } else {
+                  ref.usernameOverlay.classList.remove('hidden');
+                  ref.usernameInput.focus();
+                  ref.usernameInput.addEventListener('keydown', (event) => {
+                     roomId = room.id;
+                     if (event.key.toLowerCase() === 'enter' && /\S/.test(ref.usernameInput.value)) {
+                        send({ type: 'join', id: roomId, username: ref.usernameInput.value });
+                        ref.usernameInput.value = '';
+                     }
+                  });
+               }
+            });
+         }
+      }, 1000);
    }
    if (msg.type === 'password-right') {
       ref.privateOverlay.classList.add('hidden');
@@ -150,6 +218,9 @@ function serverMessage(msg) {
       ref.menu.classList.add('hidden');
       ref.chat.classList.remove('hidden');
       state = 'chat';
+      selfId = msg.selfId;
+      game = msg.initPack;
+      console.log(game);
       ref.chatInput.focus();
    }
 }
@@ -163,9 +234,9 @@ async function handleNetworkRequestsAndText() {
       window.ws.addEventListener('open', () => {
          window.socketStatus = 'success';
       });
-      window.ws.addEventListener('error', () => {
+      window.ws.addEventListener('close', () => {
          window.socketStatus = 'error';
-         alert('The connection with the server has been lost');
+         alert('The connection with the server has been lost. Sorry, try refreshing or checking your internet :)');
       });
 
       window.ws.addEventListener('message', (msg) => {

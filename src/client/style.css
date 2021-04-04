@@ -24,6 +24,17 @@ body {
 	align-items: center;
 }
 
+.center {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	left :0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+}
+
 
 
 .menu .main {
@@ -68,9 +79,24 @@ body {
 	top: 10%;
 	width: 80%;
 	height: 80%;
-	overflow-y: auto;
 	background-color: rgba(12, 9, 20, 0.4);
 }
+
+.overflow {
+	overflow-y: auto;
+	overflow-x: hidden;
+	overflow-wrap: break-word;
+}
+
+.overflow::-webkit-scrollbar {
+  width: 1em;
+}
+
+.overflow::-webkit-scrollbar-thumb {
+  background-color:  rgba(0, 0, 0, 0.3);
+  outline: 1px solid  rgba(0, 0, 0, 0.3);
+}
+
 
 .overlay {
 	position: absolute;
@@ -97,8 +123,50 @@ body {
 	transition: background-color 0.05s linear;
 }
 
+.leave {
+	position: absolute;
+	right: 0;
+	bottom: 45px;
+	margin: 10px;
+	width: 180px;
+	font-size: 1.5rem;
+	font-weight: normal;
+	padding: 0;
+	height: calc(40vh / 4);
+}
+
+.player-count {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: white;
+	font-size: 2rem;
+	height:;
+	width: 180px;
+	margin: 10px;
+	height: calc(40vh / 4);
+	position: absolute;
+	right: 0;
+	bottom: calc(40vh / 4 + 45px);
+}
+
 .back-button:hover {
 	background-color: #4a0101;
+}
+
+
+.enter-button {
+	margin: 20px;
+	color: white;
+	font-size: 1rem;
+	font-weight: bold;
+	background-color: #3dba3d;
+	border-radius: 6px;
+	transition: background-color 0.05s linear;
+}
+
+.enter-button:hover {
+	background-color: #2fc42f;
 }
 
 .room {
@@ -268,6 +336,8 @@ input:checked + .slider:before {
 	height: 100vh;
 	background-color: #383E53;
 	overflow: hidden;
+	opacity: 1;
+	transition: opacity 0.3s linear;
 }
 
 .my-message {
@@ -276,7 +346,7 @@ input:checked + .slider:before {
 
 .chat-message {
 	font-size: 1.2rem;
-	margin: 2px;
+	margin: 8px;
 	color: white;
 }
 
@@ -298,11 +368,15 @@ input:checked + .slider:before {
 	background-color: #069157;
 	transition: background-color 0.15s linear;
 	font-size: 1.5rem;
-	font-weight: bold;
 	color: white;
 	border-radius: 2px;
-	padding-left: 40px;
-	padding-right: 40px;
+	padding: 0;
+	width: 180px;
+	margin: 10px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: calc(40vh / 4);
 }
 
 .author::after {
@@ -314,9 +388,9 @@ input:checked + .slider:before {
 }
 
 .chat-messages {
-	width: calc(100vw - 200px);
+	width: calc(100vw - 205px);
 	height: calc(100vh - 60vh - 45px);
-	overflow-y: auto;
+	background-color: rgba(0, 0, 0, 0.1);
 }
 
 .ready:hover {

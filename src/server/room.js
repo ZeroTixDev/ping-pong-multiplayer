@@ -14,15 +14,56 @@ module.exports = class Room {
       this._password = this.private ? hash(data.password) : null;
       this.state = null;
       this.players = {};
+      this.pendingChatMessages = []; // [{ author: string, content: string }]
+      this.update = false;
    }
    get playerCount() {
       return Object.keys(this.players).length;
    }
+   get sentAllMessages() {
+      return !(this.pendingChatMessages.length > 0);
+   }
+   talk(playerId, content) {
+      this.pendingChatMessages.push({ author: playerId, content });
+   }
    addPlayer(client) {
-      this.players[client.id] = new Player();
+      this.update = true;
+      this.players[client.id] = new Player(client);
+   }
+   initPack() {
+      return {
+         room: {
+            name: this.name,
+            private: this.private,
+         },
+         players: this.playerPack,
+         maxPlayers: this.maxPlayers,
+         playerCount: this.playerCount,
+      };
+   }
+   updatePack() {
+      return {
+         room: {
+            name: this.name,
+         },
+         players: this.playerPack,
+         playerCount: this.playerCount,
+         maxPlayers: this.maxPlayers,
+      };
+   }
+   get playerPack() {
+      const pack = {};
+      for (const player of Object.values(this.players)) {
+         pack[player.id] = player.pack();
+      }
+      return pack;
    }
    removePlayer(id) {
+      this.update = true;
       delete this.players[id];
+   }
+   finishUpdate() {
+      this.update = false;
    }
    pack() {
       return {

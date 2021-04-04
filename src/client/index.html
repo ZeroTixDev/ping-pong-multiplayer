@@ -18,17 +18,17 @@
   			<div id="username-overlay" class="overlay hidden">
   				<span class="text">Username </span>
   				<input class="username-input" type="text" autocomplete="off" spellcheck="false" maxlength="16">
-  				<button class="back-button" id="username-back-button">Back</button>
+  				<button class="enter-button" id="username-enter-button">Enter</button>
   			</div>
   			<div id="password-overlay" class="overlay hidden">
   				<span class="text">Room password </span>
   				<input class="password-input" type="text" autocomplete="off" spellcheck="false" maxlength="20">
-  				<button class="back-button" id="password-back-button">Back</button>
+  				<button class="enter-button" id="password-enter-button">Enter</button>
   			</div>
   			<div class="main">
   				<h1>Rooms</h1>
-  				<div class="rooms"></div>
-  				<button class="create">or Create</button>
+  				<div class="rooms overflow"></div>
+  				<button class="create">Create</button>
   			</div>
   			<div class="create-menu hidden">
   				<div class="private sec">
@@ -56,18 +56,19 @@
   				</div>
   				<div class="create-room-div sec">
   					<button class="create-room">Create</button>
-  					<button class="back-button" id="create-back-button">or Back</button>
+  					<button class="back-button" id="create-back-button">Back</button>
   				</div>
   			</div>
   		</div>
   		<div class="chat hidden">
 			<div class="chat-div">
-				<div class="chat-messages">
-					<div class="chat-message"><span class="author my-message">ZeroTix</span><span class="message">WOW this chat is REALLY cool</span></div>
-					<div class="chat-message"><span class="author">ZeroTix</span><span class="message">Yep this chat IS cool</span></div>
+				<div class="chat-messages overflow">
+					<div class="chat-message"><span class="my-message"><h1>Chat</h1></span></div>
 				</div>
 				<input class="chat-input" type="text" autocomplete="off" spellcheck="false" maxlength="150" autofocus>
 				<button class="ready">Ready</button>
+				<div class="player-count">1 / 2</div>
+				<button class="back-button leave">Leave</button>
 			</div>
   		</div>
   </body>
