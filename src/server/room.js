@@ -12,8 +12,9 @@ module.exports = class Room {
       this.private = data.private || false;
       this.maxPlayers = data.maxPlayers;
       this._password = this.private ? hash(data.password) : null;
-      this.state = null;
+      this.state = 'chat';
       this.players = {};
+      this.readyCount = 0;
       this.pendingChatMessages = []; // [{ author: string, content: string }]
       this.update = false;
    }
@@ -26,6 +27,16 @@ module.exports = class Room {
    talk(playerId, content) {
       this.pendingChatMessages.push({ author: playerId, content });
    }
+   ready(playerId) {
+      if (!this.players[playerId].ready) {
+         this.readyCount++;
+         this.update = true;
+      }
+      this.players[playerId].ready = true;
+   }
+   updateRoom() {
+      // idk maybe do some room updating
+   }
    addPlayer(client) {
       this.update = true;
       this.players[client.id] = new Player(client);
@@ -36,6 +47,7 @@ module.exports = class Room {
             name: this.name,
             private: this.private,
          },
+         readyCount: this.readyCount,
          players: this.playerPack,
          maxPlayers: this.maxPlayers,
          playerCount: this.playerCount,
@@ -46,6 +58,7 @@ module.exports = class Room {
          room: {
             name: this.name,
          },
+         readyCount: this.readyCount,
          players: this.playerPack,
          playerCount: this.playerCount,
          maxPlayers: this.maxPlayers,
@@ -60,6 +73,9 @@ module.exports = class Room {
    }
    removePlayer(id) {
       this.update = true;
+      if (this.players[id].ready) {
+         this.readyCount--;
+      }
       delete this.players[id];
    }
    finishUpdate() {
@@ -81,7 +97,7 @@ module.exports = class Room {
 id: {
 	name: string,
 	desc: string,
-	maxPlayers: number, 
+	maxPlayers: number,
 	private: bool,
 	_password: string,
 	state: string,

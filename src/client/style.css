@@ -10,6 +10,10 @@ body {
 	user-select: none;
 }
 
+.no-overflow {
+	overflow: hidden !important;
+}
+
 .title {
 	color: white;
 	font-size: 1.7rem;
@@ -35,6 +39,12 @@ body {
 	height: 100%;
 }
 
+.button-disable {
+	user-select: none;
+	opacity: 0.8;
+	cursor: default;
+	pointer-events: none;
+}
 
 
 .menu .main {
@@ -337,8 +347,8 @@ input:checked + .slider:before {
 	height: 100vh;
 	background-color: #383E53;
 	overflow: hidden;
-	opacity: 1;
 	transition: opacity 0.3s linear;
+	overflow: hidden;
 }
 
 .my-message {
@@ -447,10 +457,10 @@ input:checked + .slider:before {
 		transform: rotate(0deg) scale(0.55);
 	}
 	50% {
-		transform: rotate(360deg) scale(0.75);
+		transform: rotate(180deg) scale(0.75);
 	}
 	100% {
-		transform: rotate(0deg) scale(0.55);
+		transform: rotate(360deg) scale(0.55);
 	}
 }
 
@@ -519,6 +529,9 @@ input:checked + .slider:before {
 .fade-out {
 	opacity: 0;
 }
+
+
+
 .fade-in {
 	opacity: 1;
 }
@@ -569,4 +582,78 @@ input:checked + .slider:before {
 
 .hidden {
 	display: none !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.effect-1 {
+	 animation: foolishIn 2.5s ease-in-out;
+}
+
+ @keyframes foolishIn {
+	 0% {
+		 opacity: 0;
+		 -webkit-transform-origin: 50% 50%;
+		 transform-origin: 50% 50%;
+		 -webkit-transform: scale(0, 0) rotate(360deg);
+		 transform: scale(0, 0) rotate(360deg);
+	}
+	 20% {
+		 opacity: 1;
+		 -webkit-transform-origin: 0% 100%;
+		 transform-origin: 0% 100%;
+		 -webkit-transform: scale(0.5, 0.5) rotate(0deg);
+		 transform: scale(0.5, 0.5) rotate(0deg);
+	}
+	 40% {
+		 opacity: 1;
+		 -webkit-transform-origin: 100% 100%;
+		 transform-origin: 100% 100%;
+		 -webkit-transform: scale(0.5, 0.5) rotate(0deg);
+		 transform: scale(0.5, 0.5) rotate(0deg);
+	}
+	 60% {
+		 opacity: 1;
+		 -webkit-transform-origin: 0%;
+		 transform-origin: 0%;
+		 -webkit-transform: scale(0.5, 0.5) rotate(0deg);
+		 transform: scale(0.5, 0.5) rotate(0deg);
+	}
+	 80% {
+		 opacity: 1;
+		 -webkit-transform-origin: 0% 0%;
+		 transform-origin: 0% 0%;
+		 -webkit-transform: scale(0.5, 0.5) rotate(0deg);
+		 transform: scale(0.5, 0.5) rotate(0deg);
+	}
+	 100% {
+		 opacity: 1;
+		 -webkit-transform-origin: 50% 50%;
+		 transform-origin: 50% 50%;
+		 -webkit-transform: scale(1, 1) rotate(0deg);
+		 transform: scale(1, 1) rotate(0deg);
+	}
 }

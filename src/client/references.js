@@ -17,8 +17,8 @@ module.exports = {
    usernameInput: document.querySelector('.username-input'),
    passwordInput: document.querySelector('.password-input'),
    chat: document.querySelector('.chat'),
-   privateEnterButton: document.querySelector('#password-enter-button'),
-   usernameEnterButton: document.querySelector('#username-enter-button'),
+   // privateEnterButton: document.querySelector('#password-enter-button'),
+   // usernameEnterButton: document.querySelector('#username-enter-button'),
    createBackButton: document.querySelector('#create-back-button'),
    serverNameInput: document.querySelector('.server-name-input'),
    serverDescInput: document.querySelector('.server-desc-input'),
@@ -30,4 +30,5 @@ module.exports = {
    leaveButton: document.querySelector('.leave'),
    roomTitle: document.querySelector('.room-title'),
    readyCounter: document.querySelector('.ready-counter'),
+   readyButton: document.querySelector('.ready'),
 };

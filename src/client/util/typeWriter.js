@@ -1,3 +1,5 @@
+'use strict';
+
 const { typingSpeed } = require('../constants.js');
 
 module.exports = async function typeWriter(text, element, elementType = null, styles = null) {

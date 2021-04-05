@@ -94,14 +94,11 @@ ref.privateCheckBox.addEventListener('click', () => {
    }
 });
 
-ref.usernameEnterButton.addEventListener('mousedown', () => {
-   send({ type: 'join', id: roomId, username: ref.usernameInput.value });
-   ref.usernameInput.value = '';
-});
-
-ref.privateEnterButton.addEventListener('mousedown', () => {
-   send({ type: 'join', id: roomId, password: hash(ref.passwordInput.value) });
-   ref.passwordInput.value = '';
+ref.readyButton.addEventListener('mousedown', () => {
+   if (state === 'chat' && !ref.readyButton.classList.contains('button-disable')) {
+      send({ type: 'ready' });
+      ref.readyButton.classList.add('button-disable');
+   }
 });
 
 ref.usernameOverlay.addEventListener('mousedown', () => {
@@ -141,11 +138,23 @@ function serverMessage(msg) {
    if (msg.type === 'my-room-update') {
       const roomData = msg.data;
       ref.playerCount.innerText = `${roomData.playerCount} / ${roomData.maxPlayers}`;
-      game.playerCount = roomData.playerCount;
-      game.maxPlayers = roomData.maxPlayers;
-      game.players = roomData.players;
-      game.room.name = roomData.room.name;
-      ref.roomTitle.innerText = game.room.name;
+      if (roomData.playerCount) {
+         game.playerCount = roomData.playerCount;
+      }
+      if (roomData.maxPlayers) {
+         game.maxPlayers = roomData.maxPlayers;
+      }
+      if (roomData.players) {
+         game.players = roomData.players;
+      }
+      if (roomData.room && roomData.room.name) {
+         game.room.name = roomData.room.name;
+         ref.roomTitle.innerText = game.room.name;
+      }
+      if (roomData.readyCount) {
+         game.readyCount = roomData.readyCount;
+         ref.readyCounter.innerText = `${game.readyCount} / ${game.maxPlayers}`;
+      }
    }
    if (msg.type === 'chat-update') {
       const messages = msg.messages;
@@ -190,25 +199,23 @@ function serverMessage(msg) {
                if (room.private) {
                   ref.privateOverlay.classList.remove('hidden');
                   ref.passwordInput.focus();
-                  ref.passwordInput.addEventListener('keydown', function handle(event) {
+                  ref.passwordInput.onkeydown = function handle(event) {
                      roomId = room.id;
                      if (event.key.toLowerCase() === 'enter' && /\S/.test(ref.passwordInput.value)) {
                         send({ type: 'join', id: roomId, password: hash(ref.passwordInput.value) });
                         ref.passwordInput.value = '';
-                        ref.passwordInput.removeEventListener('keydown', handle);
                      }
-                  });
+                  };
                } else {
                   ref.usernameOverlay.classList.remove('hidden');
                   ref.usernameInput.focus();
-                  ref.usernameInput.addEventListener('keydown', function handle(event) {
+                  ref.usernameInput.onkeydown = function handle(event) {
                      roomId = room.id;
                      if (event.key.toLowerCase() === 'enter' && /\S/.test(ref.usernameInput.value)) {
                         send({ type: 'join', id: roomId, username: ref.usernameInput.value });
                         ref.usernameInput.value = '';
-                        ref.usernameInput.removeEventListener('keydown', handle);
                      }
-                  });
+                  };
                }
             });
          }
@@ -229,10 +236,19 @@ function serverMessage(msg) {
    if (msg.type === 'success') {
       ref.menu.classList.add('hidden');
       ref.chat.classList.remove('hidden');
+      ref.chat.classList.add('effect-1');
+      ref.readyButton.classList.remove('button-disable');
+      document.body.classList.add('no-overflow');
+      ref.chat.onanimationend = () => {
+         ref.chat.classList.remove('effect-1');
+         document.body.classList.remove('no-overflow');
+      };
       state = 'chat';
       selfId = msg.selfId;
       game = msg.initPack;
       ref.roomTitle.innerText = game.room.name;
+      console.log('ready', `${game.readyCount} / ${game.maxPlayers}`);
+      ref.readyCounter.innerText = `${game.readyCount} / ${game.maxPlayers}`;
       console.log(game);
       ref.chatInput.focus();
    }

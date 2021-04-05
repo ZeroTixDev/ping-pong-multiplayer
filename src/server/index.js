@@ -80,13 +80,21 @@ setInterval(() => {
    }
    state.finishUpdating();
    state.roomChange = false;
-}, 2000);
+}, 1000);
 
 //game loop
 setInterval(() => {
-   // update the game maybe
+   Update();
+   Send();
+}, 1000 / tickRate);
 
-   // send to clients
+function Update() {
+   for (const room of Object.values(state.rooms)) {
+      room.updateRoom();
+   }
+}
+
+function Send() {
    for (const room of Object.values(state.rooms)) {
       if (!room.sentAllMessages) {
          for (const player of Object.values(room.players)) {
@@ -98,7 +106,7 @@ setInterval(() => {
          room.pendingChatMessages = [];
       }
    }
-}, 1000 / tickRate);
+}
 
 function addRoom(data, id) {
    state.rooms[id] = new Room(data, id);
@@ -128,6 +136,9 @@ function newMessage({ data, id }) {
          }
       }
       client.inConnecting(); // changes state to being in game menu
+   }
+   if (data.type === 'ready' && client.state === 'in-game') {
+      state.rooms[client.roomId].ready(client.id);
    }
    if (data.type === 'chat' && client.state === 'in-game') {
       state.rooms[client.roomId].talk(client.id, removeTags(data.content));
@@ -163,7 +174,6 @@ function newMessage({ data, id }) {
          desc: removeTags(data.desc),
          maxPlayers: 2,
          private: data.private,
-         state: 'chat',
          password: data.password,
          host: client.id,
       });
@@ -195,7 +205,6 @@ addRoom(
       desc: 'Play with randoms!',
       maxPlayers: 2,
       private: false,
-      state: 'chat',
       players: [],
    },
    uniqueId(Object.keys(state.rooms))
@@ -207,7 +216,6 @@ addRoom(
       desc: 'Play with more randoms!',
       maxPlayers: 2,
       private: false,
-      state: 'chat',
       players: [],
    },
    uniqueId(Object.keys(state.rooms))
@@ -218,7 +226,6 @@ addRoom(
       name: 'Testing room',
       desc: 'Room Testing hehe',
       maxPlayers: 2,
-      state: 'chat',
       players: [],
       private: true,
       password: 'imagine',
@@ -231,7 +238,6 @@ addRoom(
       name: 'Noobs',
       desc: 'A lobby for noobs!',
       maxPlayers: 2,
-      state: 'chat',
       players: [],
       private: false,
    },
@@ -243,7 +249,6 @@ addRoom(
       name: 'Dev room',
       desc: 'Dev Room :)',
       maxPlayers: 2,
-      state: 'chat',
       players: [],
       private: true,
       password: 'dev!!',
@@ -256,7 +261,6 @@ addRoom(
       name: 'password is nothing',
       desc: 'there is no password haha',
       maxPlayers: 2,
-      state: 'chat',
       players: [],
       private: true,
       password: 'nothing',

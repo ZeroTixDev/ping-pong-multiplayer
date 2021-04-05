@@ -10,6 +10,7 @@ const plugins = [
       title: 'Pong',
       template: paths.src + '/index.html',
       filename: './index.html',
+      favicon: paths.images + '/logo.svg',
       minify: {
          removeComments: true,
          collapseWhitespace: true,
@@ -55,4 +56,7 @@ module.exports = {
       ],
    },
    plugins,
+   watchOptions: {
+      ignored: '**/node_modules',
+   },
 };

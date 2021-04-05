@@ -5,6 +5,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
 	 <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg" href="/logo.svg"/>
     <title><%= htmlWebpackPlugin.options.title %></title>
   </head>
 
@@ -18,12 +19,12 @@
   			<div id="username-overlay" class="overlay hidden">
   				<span class="text">Username </span>
   				<input class="username-input" type="text" autocomplete="off" spellcheck="false" maxlength="16">
-  				<button class="enter-button" id="username-enter-button">Enter</button>
+  				<!-- <button class="enter-button" id="username-enter-button">Enter</button> -->
   			</div>
   			<div id="password-overlay" class="overlay hidden">
   				<span class="text">Room password </span>
   				<input class="password-input" type="text" autocomplete="off" spellcheck="false" maxlength="20">
-  				<button class="enter-button" id="password-enter-button">Enter</button>
+  				<!-- <button class="enter-button" id="password-enter-button">Enter</button> -->
   			</div>
   			<div class="main">
   				<h1>Rooms</h1>
@@ -77,6 +78,9 @@
 				<div class="player-count">1 / 2</div>
 				<button class="back-button leave">Leave</button>
 			</div>
+  		</div>
+  		<div class="game hidden">
+  			<canvas class="game-canvas">This game needs Canvas Support</canvas>
   		</div>
   </body>
 </html>

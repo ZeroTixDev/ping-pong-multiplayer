@@ -7,6 +7,7 @@ module.exports = class Player {
       this.name =
          client.username ||
          `Guest ${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}`;
+      this.ready = false;
    }
    pack() {
       return {
