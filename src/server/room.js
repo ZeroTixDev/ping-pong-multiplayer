@@ -34,8 +34,19 @@ module.exports = class Room {
       }
       this.players[playerId].ready = true;
    }
+   send(client) {
+      if (!this.sentAllMessages) {
+         client.send({ type: 'chat-update', messages: [...this.pendingChatMessages] });
+      }
+   }
+   resetAfterSend() {
+      this.pendingChatMessages = [];
+   }
    updateRoom() {
       // idk maybe do some room updating
+      // if (this.readyCount === this.maxPlayers) {
+      // 	this.state = 'game'
+      // }
    }
    addPlayer(client) {
       this.update = true;

@@ -96,15 +96,13 @@ function Update() {
 
 function Send() {
    for (const room of Object.values(state.rooms)) {
-      if (!room.sentAllMessages) {
-         for (const player of Object.values(room.players)) {
-            const client = clients[player.id];
-            if (client.socket.readyState === WebSocket.OPEN) {
-               client.send({ type: 'chat-update', messages: [...room.pendingChatMessages] });
-            }
+      for (const player of Object.values(room.players)) {
+         const client = clients[player.id];
+         if (client.socket.readyState === WebSocket.OPEN) {
+            room.send(client);
          }
-         room.pendingChatMessages = [];
       }
+      room.resetAfterSend();
    }
 }
 
