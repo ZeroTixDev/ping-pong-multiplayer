@@ -45,6 +45,7 @@ ref.leaveButton.addEventListener('mousedown', () => {
          ref.menu.classList.add('fade-in');
          ref.menu.classList.remove('hidden');
          ref.menuMain.classList.remove('hidden');
+         ref.createMenu.classList.add('hidden');
          ref.usernameOverlay.classList.add('hidden');
          ref.roomDiv.innerHTML = '<div class="center"><div class="loader"></div></div>';
          state = null;
@@ -153,7 +154,9 @@ function serverMessage(msg) {
       for (const { author, content } of messages) {
          ref.chatMessages.innerHTML += `
          <div class="chat-message">
-         	<span class="author ${author === selfId ? 'my-message' : ''}">${game.players[author].name}</span>
+         	<span class="author ${author === selfId || author === 'SERVER' ? 'my-message' : ''}">${
+            author === 'SERVER' ? 'SERVER' : game.players[author].name
+         }</span>
          	<span class="message">${content}</span>
          </div>
          `;

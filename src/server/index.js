@@ -143,6 +143,7 @@ function newMessage({ data, id }) {
       ) {
          console.log('player did right password');
          client.password = data.password;
+         room.talk('SERVER', `${client.username} has joined!`);
          client.send({ type: 'password-right' });
       }
       if (data.password === undefined && room.playerCount + 1 <= room.maxPlayers) {
@@ -151,6 +152,7 @@ function newMessage({ data, id }) {
             client.username = removeTags(data.username) || '';
             room.addPlayer(client);
             client.enterGame(room.id);
+            room.talk('SERVER', `${client.username} has joined!`);
             client.send({ type: 'success', selfId: client.id, initPack: room.initPack() });
          }
       }
@@ -167,6 +169,7 @@ function newMessage({ data, id }) {
       });
       client.username = removeTags(data.username) || '';
       room.addPlayer(client);
+      room.talk('SERVER', `${client.username} has joined!`);
       client.enterGame(room.id);
       client.send({ type: 'success', selfId: client.id, initPack: room.initPack() });
    }
