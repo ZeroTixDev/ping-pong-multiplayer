@@ -15,8 +15,10 @@ module.exports = class Room {
       this.state = 'chat';
       this.players = {};
       this.readyCount = 0;
+      this.countdown = 3;
       this.pendingChatMessages = []; // [{ author: string, content: string }]
       this.update = false;
+      this.sendPackage = {};
    }
    get playerCount() {
       return Object.keys(this.players).length;
@@ -38,19 +40,27 @@ module.exports = class Room {
       if (!this.sentAllMessages) {
          client.send({ type: 'chat-update', messages: [...this.pendingChatMessages] });
       }
+      if (Object.keys(this.sendPackage).length > 0) {
+         client.send({ ...this.sendPackage });
+      }
    }
    resetAfterSend() {
       this.pendingChatMessages = [];
+      this.sendPackage = {};
    }
    updateRoom() {
       // idk maybe do some room updating
-      // if (this.readyCount === this.maxPlayers) {
-      // 	this.state = 'game'
-      // }
+      if (this.readyCount === this.maxPlayers && this.state !== 'game') {
+         this.state = 'game';
+         this.countdown = 3;
+         this.sendPackage['change'] = 'game';
+         this.sendPackage['countdown'] = true;
+      }
    }
    addPlayer(client) {
       this.update = true;
       this.players[client.id] = new Player(client);
+      this.talk('SERVER', `${client.username} has joined!`);
    }
    initPack() {
       return {
@@ -87,7 +97,26 @@ module.exports = class Room {
       if (this.players[id].ready) {
          this.readyCount--;
       }
+      if (this.readyCount !== this.maxPlayers && this.state === 'game') {
+         this.state = 'chat';
+         this.sendPackage['change'] = 'chat';
+         this.readyCount = 0;
+         for (const player of Object.values(this.players)) {
+            player.ready = false;
+         }
+      }
+      this.talk('SERVER', `${this.players[id].name} has left the game!`);
       delete this.players[id];
+   }
+   forfeit(id) {
+      this.update = true;
+      this.state = 'chat';
+      this.sendPackage['change'] = 'chat';
+      this.readyCount = 0;
+      for (const player of Object.values(this.players)) {
+         player.ready = false;
+      }
+      this.talk('SERVER', `${this.players[id].name} has forfeited! What a noob`);
    }
    finishUpdate() {
       this.update = false;

@@ -1,6 +1,6 @@
 'use strict';
 
-const { typingSpeed } = require('../constants.js');
+const { TYPING_SPEED } = require('../../shared/constants.js');
 
 module.exports = async function typeWriter(text, element, elementType = null, styles = null) {
    return new Promise((resolve, _reject) => {
@@ -13,7 +13,7 @@ module.exports = async function typeWriter(text, element, elementType = null, st
             } else {
                element.innerHTML += text.charAt(i);
             }
-            setTimeout(() => type(i + 1), 1000 / typingSpeed);
+            setTimeout(() => type(i + 1), 1000 / TYPING_SPEED);
          } else {
             resolve();
          }

@@ -141,6 +141,9 @@ function newMessage({ data, id }) {
    if (data.type === 'chat' && client.state === 'in-game') {
       state.rooms[client.roomId].talk(client.id, removeTags(data.content));
    }
+   if (data.type === 'forfeit' && client.state === 'in-game') {
+      state.rooms[client.roomId].forfeit(client.id);
+   }
    if (data.type === 'join' && client.state === 'game-menu' && state.rooms[data.id] !== undefined) {
       const room = state.rooms[data.id];
       if (room === undefined) return;
@@ -161,7 +164,6 @@ function newMessage({ data, id }) {
             client.username = removeTags(data.username) || '';
             room.addPlayer(client);
             client.enterGame(room.id);
-            room.talk('SERVER', `${client.username} has joined!`);
             client.send({ type: 'success', selfId: client.id, initPack: room.initPack() });
          }
       }

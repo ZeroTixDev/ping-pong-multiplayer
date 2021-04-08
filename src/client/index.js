@@ -5,15 +5,23 @@ require('./style.css');
 const ref = require('./references.js');
 const hash = require('../shared/hash.js');
 const typeWriter = require('./util/typeWriter.js');
+const resize = require('./util/resize.js');
+const Game = require('./game/game.js');
 
 let rooms = null;
 let roomId = null;
 let selfId = null;
 let game = null;
 let state = null; // THIS IS NULL
+window.gameRaf = null;
 
 window.addEventListener('load', () => {
    handleNetworkRequestsAndText();
+   resize([ref.canvas, ref.gui]);
+});
+
+window.addEventListener('resize', () => {
+   resize([ref.canvas, ref.gui]);
 });
 
 window.addEventListener('keydown', (event) => {
@@ -22,6 +30,19 @@ window.addEventListener('keydown', (event) => {
    }
 });
 
+function gameLoop() {
+   Game.Render(Game.Update(null));
+   window.gameRaf = requestAnimationFrame(gameLoop);
+}
+
+function startGame() {
+   window.gameRaf = requestAnimationFrame(gameLoop);
+}
+
+function endGame() {
+   cancelAnimationFrame(window.gameRaf);
+}
+
 ref.chatInput.addEventListener('keydown', (event) => {
    if (state !== 'chat') return ref.chatInput.blur();
    if (event.key.toLowerCase() === 'enter' && /\S/.test(ref.chatInput.value)) {
@@ -29,6 +50,12 @@ ref.chatInput.addEventListener('keydown', (event) => {
       send({ type: 'chat', content: ref.chatInput.value });
       ref.chatInput.value = '';
    }
+});
+
+ref.forfeitButton.addEventListener('mousedown', () => {
+   if (state !== 'game') return;
+   send({ type: 'forfeit' });
+   ref.forfeitButton.classList.add('button-disable');
 });
 
 ref.leaveButton.addEventListener('mousedown', () => {
@@ -138,22 +165,39 @@ function serverMessage(msg) {
    if (msg.type === 'my-room-update') {
       const roomData = msg.data;
       ref.playerCount.innerText = `${roomData.playerCount} / ${roomData.maxPlayers}`;
-      if (roomData.playerCount) {
+      if (roomData.playerCount !== undefined) {
          game.playerCount = roomData.playerCount;
       }
-      if (roomData.maxPlayers) {
+      if (roomData.maxPlayers !== undefined) {
          game.maxPlayers = roomData.maxPlayers;
       }
-      if (roomData.players) {
+      if (roomData.players !== undefined) {
          game.players = roomData.players;
       }
-      if (roomData.room && roomData.room.name) {
+      if (roomData.room !== undefined && roomData.room.name !== undefined) {
          game.room.name = roomData.room.name;
          ref.roomTitle.innerText = game.room.name;
       }
-      if (roomData.readyCount) {
+      if (roomData.readyCount !== undefined) {
+         console.log('changed readycount to', roomData.readyCount);
          game.readyCount = roomData.readyCount;
          ref.readyCounter.innerText = `${game.readyCount} / ${game.maxPlayers}`;
+      }
+   }
+   if (msg.change !== undefined) {
+      if (msg.change === 'game') {
+         ref.game.classList.remove('hidden');
+         ref.forfeitButton.classList.remove('button-disable');
+         ref.chat.classList.add('hidden');
+         state = 'game';
+         startGame();
+      }
+      if (msg.change === 'chat') {
+         ref.game.classList.add('hidden');
+         ref.chat.classList.remove('hidden');
+         ref.readyButton.classList.remove('button-disable');
+         state = 'chat';
+         endGame();
       }
    }
    if (msg.type === 'chat-update') {

@@ -160,7 +160,7 @@ body {
 	bottom: calc(40vh / 4 + 45px);
 }
 
-.back-button:hover {
+.back-button:hover, .forfeit:hover {
 	background-color: #4a0101;
 }
 
@@ -421,8 +421,43 @@ input:checked + .slider:before {
 }
 
 
+.game {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden;
+}
 
+.forfeit {
+	position: absolute;
+	bottom: 0;
+	background-color: red;
+	color: white;
+	font-size: 1.5rem;
+}
 
+canvas {
+	position: absolute;
+	left: 0;
+	top: 0;
+	background-color: white;
+}
+
+.gui {
+	position: absolute;
+	left: 0;
+	top: 0;
+	background-color: rgba(0, 0, 0, 0);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
+}
 
 
 .game-status {
