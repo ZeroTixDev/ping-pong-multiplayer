@@ -2,6 +2,22 @@
 
 const Player = require('./player.js');
 const hash = require('../shared/hash.js');
+const { COUNTDOWN, SIMULATION_RATE } = require('../shared/constants.js');
+const initialState = require('./initialState.json');
+
+function parseState(data, paddleIds) {
+   const state = Object.create(null);
+   state.paddles = {};
+   if (data.paddles) {
+      for (let i = 0; i < data.paddles.length; i++) {
+         state.paddles[paddleIds[i]] = data.paddles[i];
+      }
+   }
+   if (data.ball) {
+      state.ball = data.ball;
+   }
+   return state;
+}
 
 module.exports = class Room {
    constructor(data, id) {
@@ -15,10 +31,12 @@ module.exports = class Room {
       this.state = 'chat';
       this.players = {};
       this.readyCount = 0;
-      this.countdown = 3;
+      this.countdown = COUNTDOWN;
       this.pendingChatMessages = []; // [{ author: string, content: string }]
       this.update = false;
       this.sendPackage = {};
+      this.tick = 0;
+      this.startTime = null;
    }
    get playerCount() {
       return Object.keys(this.players).length;
@@ -48,13 +66,36 @@ module.exports = class Room {
       this.pendingChatMessages = [];
       this.sendPackage = {};
    }
+   get playerIds() {
+      return Object.keys(this.players);
+   }
    updateRoom() {
       // idk maybe do some room updating
       if (this.readyCount === this.maxPlayers && this.state !== 'game') {
          this.state = 'game';
-         this.countdown = 3;
+         this.countdown = COUNTDOWN;
+         this.startTime = Date.now();
+         this.tick = 0;
+         this.gameState = parseState(initialState, [...this.playerIds]);
          this.sendPackage['change'] = 'game';
-         this.sendPackage['countdown'] = true;
+         this.sendPackage['start'] = this.startTime;
+         this.sendPackage['state'] = this.gameState;
+      }
+      if (this.state === 'game') {
+         this.gameUpdate();
+      }
+   }
+   gameUpdate() {
+      const expectedTick = Math.ceil((Date.now() - this.startTime) / (1000 / SIMULATION_RATE));
+      const delta = 1 / SIMULATION_RATE;
+
+      while (this.tick < expectedTick) {
+         if (this.countdown > 0) {
+            this.countdown -= delta;
+         } else {
+            this.countdown = 0;
+         }
+         this.tick++;
       }
    }
    addPlayer(client) {
@@ -116,7 +157,7 @@ module.exports = class Room {
       for (const player of Object.values(this.players)) {
          player.ready = false;
       }
-      this.talk('SERVER', `${this.players[id].name} has forfeited! What a noob`);
+      this.talk('SERVER', `${this.players[id].name} has forfeited the game! What a noob`);
    }
    finishUpdate() {
       this.update = false;

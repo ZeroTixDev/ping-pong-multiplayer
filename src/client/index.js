@@ -7,11 +7,13 @@ const hash = require('../shared/hash.js');
 const typeWriter = require('./util/typeWriter.js');
 const resize = require('./util/resize.js');
 const Game = require('./game/game.js');
+const { COUNTDOWN } = require('../shared/constants.js');
 
 let rooms = null;
 let roomId = null;
 let selfId = null;
 let game = null;
+window.gameState = null;
 let state = null; // THIS IS NULL
 window.gameRaf = null;
 
@@ -31,7 +33,7 @@ window.addEventListener('keydown', (event) => {
 });
 
 function gameLoop() {
-   Game.Render(Game.Update(null));
+   Game.Render(Game.Update(window.gameState));
    window.gameRaf = requestAnimationFrame(gameLoop);
 }
 
@@ -160,6 +162,30 @@ ref.createBackButton.addEventListener('mousedown', () => {
    });
 });
 
+function openFullscreen() {
+   const elem = document.documentElement;
+   if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+   } else if (elem.webkitRequestFullscreen) {
+      /* Safari */
+      elem.webkitRequestFullscreen();
+   } else if (elem.msRequestFullscreen) {
+      /* IE11 */
+      elem.msRequestFullscreen();
+   }
+}
+function closeFullscreen() {
+   if (document.exitFullscreen) {
+      document.exitFullscreen();
+   } else if (document.webkitExitFullscreen) {
+      /* Safari */
+      document.webkitExitFullscreen();
+   } else if (document.msExitFullscreen) {
+      /* IE11 */
+      document.msExitFullscreen();
+   }
+}
+
 function serverMessage(msg) {
    console.log(msg);
    if (msg.type === 'my-room-update') {
@@ -190,6 +216,8 @@ function serverMessage(msg) {
          ref.forfeitButton.classList.remove('button-disable');
          ref.chat.classList.add('hidden');
          state = 'game';
+         window.gameState = {};
+         // openFullscreen();
          startGame();
       }
       if (msg.change === 'chat') {
@@ -197,8 +225,19 @@ function serverMessage(msg) {
          ref.chat.classList.remove('hidden');
          ref.readyButton.classList.remove('button-disable');
          state = 'chat';
+         window.gameState = null;
          endGame();
       }
+   }
+   if (msg.start !== undefined) {
+      window.gameState.startTime = msg.start;
+      window.gameState.tick = 0;
+      window.gameState.countdownAlpha = 1;
+      window.gameState.countdown = COUNTDOWN; // msg countdown refers to the date.now on which server sent
+   }
+   if (msg.state !== undefined) {
+      console.log(msg.state);
+      window.gameState.state = msg.state;
    }
    if (msg.type === 'chat-update') {
       const messages = msg.messages;

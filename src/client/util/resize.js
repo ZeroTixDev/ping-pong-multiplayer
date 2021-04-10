@@ -3,7 +3,6 @@ const { CANVAS_WIDTH, CANVAS_HEIGHT } = require('../../shared/constants');
 
 module.exports = function resize(elements, func = () => {}) {
    for (const element of elements) {
-      console.log(element);
       if (element.width !== CANVAS_WIDTH) {
          element.width = CANVAS_WIDTH;
          element.style.width = `${CANVAS_WIDTH}px`;

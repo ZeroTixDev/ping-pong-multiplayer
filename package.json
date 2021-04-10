@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/server/index.js",
-    "server": "nodemon ./src/server/index.js --watch ./src/server --watch ./assets/ --watch ./src/shared --ext js",
+    "server": "nodemon ./src/server/index.js --watch ./src/server --watch ./assets/ --watch ./src/shared --ext js .json",
     "build": "webpack --config config/webpack.prod.js",
     "prod": "npm-run-all --parallel server prod-client",
     "prod-client": "webpack --config config/webpack.prod.js --watch",
