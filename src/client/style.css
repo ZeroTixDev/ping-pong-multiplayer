@@ -442,6 +442,14 @@ input:checked + .slider:before {
 	font-size: 1.5rem;
 }
 
+.ping {
+	position: absolute;
+	color: white;
+	bottom: 0;
+	left: 0;
+	font-size: 1.5rem;
+}
+
 canvas {
 	position: absolute;
 	left: 0;

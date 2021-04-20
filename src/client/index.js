@@ -21,6 +21,9 @@ let state = null; // THIS IS NULL
 window.gameRaf = null;
 window.extraLag = 0;
 
+const pings = [];
+const pingAmount = 5;
+
 window.addEventListener('load', () => {
    handleNetworkRequestsAndText();
    resize([ref.canvas, ref.gui]);
@@ -212,6 +215,13 @@ function serverMessage(msg) {
    if (!msg.state && !msg.inputs) {
       console.log(msg);
    }
+   if (msg.ping !== undefined) {
+      pings.push(msg.ping);
+      if (pings.length > 20) {
+         pings.shift();
+      }
+      ref.pingText.innerText = `${Math.round(pings.reduce((a, b) => a + b) / pings.length)}`;
+   }
    if (msg.type === 'my-room-update') {
       const roomData = msg.data;
       ref.playerCount.innerText = `${roomData.playerCount} / ${roomData.maxPlayers}`;
@@ -292,8 +302,6 @@ function serverMessage(msg) {
    }
    if (msg.type === 'chat-update') {
       const messages = msg.messages;
-      const isScrolledToBottom =
-         ref.chatMessages.scrollHeight - ref.chatMessages.clientHeight <= ref.chatMessages.scrollTop + 1;
       for (const { author, content } of messages) {
          ref.chatMessages.innerHTML += `
          <div class="chat-message">
@@ -304,9 +312,7 @@ function serverMessage(msg) {
          </div>
          `;
       }
-      if (isScrolledToBottom) {
-         ref.chatMessages.scrollTop = ref.chatMessages.scrollHeight - ref.chatMessages.clientHeight;
-      }
+      ref.chatMessages.scrollTop = ref.chatMessages.scrollHeight - ref.chatMessages.clientHeight;
    }
    if (msg.type === 'rooms') {
       setTimeout(() => {
@@ -470,6 +476,9 @@ async function handleNetworkRequestsAndText() {
                   ref.loading.removeEventListener('transitionend', handle);
                });
             });
+            setInterval(() => {
+               send({ ping: Date.now() });
+            }, 1000 / pingAmount);
          });
       });
    });

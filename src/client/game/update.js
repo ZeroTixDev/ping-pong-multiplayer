@@ -22,20 +22,23 @@ module.exports = function Update(game) {
    const delta = 1 / SIMULATION_RATE;
 
    const input = copy(window.currentInput);
-
-   if (!sameInput(input, copy(window.lastInput))) {
-      send({
-         inputs: [
-            {
-               tick: game.tick,
-               input,
-            },
-         ],
-      });
-      game.inputs[game.tick][window.selfId] = input;
+   if (game.ticksSent === undefined) {
+      game.ticksSent = {};
    }
 
-   window.lastInput = copy(input);
+   // if (!sameInput(input, copy(window.lastInput))) {
+   //    send({
+   //       inputs: [
+   //          {
+   //             tick: game.tick,
+   //             input,
+   //          },
+   //       ],
+   //    });
+   //    game.inputs[game.tick][window.selfId] = input;
+   // }
+
+   // window.lastInput = copy(input);
 
    game.poll().forEach((data) => {
       if (game.inputs[data.tick] === undefined) {
@@ -46,6 +49,8 @@ module.exports = function Update(game) {
    });
 
    game.pendingInputs = [];
+
+   const inputPackages = [];
 
    while (game.tick < expectedTick) {
       let onCountdown = false;
@@ -63,18 +68,29 @@ module.exports = function Update(game) {
          if (game.inputs[game.tick + 1] === undefined) {
             game.inputs[game.tick + 1] = Object.create(null);
          }
+         if (game.ticksSent[game.tick + 1] === undefined) {
+            game.inputs[game.tick + 1][window.selfId] = input;
+            inputPackages.push({ tick: game.tick + 1, input });
+            game.ticksSent[game.tick + 1] = true;
+         }
       } else {
          game.states[game.tick + 1] = copy(game.states[game.tick]);
          game.inputs[game.tick + 1] = copy(game.inputs[game.tick]);
       }
       game.tick++;
    }
+
+   if (inputPackages.length > 0) {
+      send({
+         inputs: [...inputPackages],
+      });
+   }
    // smoothing
 
    const realDelta = (window.performance.now() - game.lastTime) / 1000;
    game.lastTime = window.performance.now();
 
-   const lerpTime = Math.min(realDelta * (SIMULATION_RATE / 3), 1);
+   const lerpTime = Math.min(realDelta * (SIMULATION_RATE / 2.5), 1);
    game.renderState.ball.x = lerp(game.renderState.ball.x, game.state().ball.x, lerpTime);
    game.renderState.ball.y = lerp(game.renderState.ball.y, game.state().ball.y, lerpTime);
 
@@ -83,14 +99,16 @@ module.exports = function Update(game) {
       const realPaddle = copy(game.state().paddles[id]);
       paddle.x = lerp(paddle.x, realPaddle.x, lerpTime);
       paddle.y = lerp(paddle.y, realPaddle.y, lerpTime);
+      paddle.width = lerp(paddle.width, realPaddle.width, lerpTime * 0.2);
+      paddle.height = lerp(paddle.height, realPaddle.height, lerpTime * 0.2);
    }
 
    return { game, ctx, canvas };
 };
 
-function sameInput(input1, input2) {
-   return input1.up === input2.up && input1.down === input2.down;
-}
+// function sameInput(input1, input2) {
+//    return input1.up === input2.up && input1.down === input2.down;
+// }
 
 function lerp(start, end, time) {
    return start * (1 - time) + end * time;

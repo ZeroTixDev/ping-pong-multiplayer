@@ -4,13 +4,13 @@
 			"x": 100,
 			"y": 450,
 			"width": 25,
-			"height": 200
+			"height": 500
 		},
 		{
 			"x": 1500,
 			"y": 450,
 			"width": 25,
-			"height": 200
+			"height": 500
 		}
 	],
 	"ball": {

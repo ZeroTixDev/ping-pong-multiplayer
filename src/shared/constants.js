@@ -6,8 +6,10 @@ module.exports = {
    CANVAS_HEIGHT: 900,
    COUNTDOWN: 3,
    SIMULATION_RATE: 60,
-   PADDLE_FRICTION: 0.79,
-   SPEED: 100,
+   PADDLE_FRICTION: 0.91,
+   SPEED: 80,
+   BALL_MAX_SPEED: 1000,
+   INPUT_DECAY: 0.5,
    controls: {
       KeyW: { movement: true, name: 'up' },
       ArrowUp: { movement: true, name: 'up' },

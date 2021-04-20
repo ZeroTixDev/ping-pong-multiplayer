@@ -130,6 +130,9 @@ function newMessage({ data, id }) {
       client.inGameMenu(); // changes state to being in game menu
       console.log('sent room data');
    }
+   if (data.ping !== undefined) {
+      client.send({ ping: Date.now() - data.ping });
+   }
    if (data.type === 'leave-room' && client.state === 'in-game') {
       const room = state.rooms[client.roomId];
       if (room !== undefined) {

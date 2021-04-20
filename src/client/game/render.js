@@ -15,7 +15,7 @@ module.exports = function Render({ game, ctx, canvas }) {
    }
    if (game.state !== undefined) {
       drawBall(game.renderState.ball, { ctx });
-      drawPaddles(Object.values(game.renderState.paddles), { ctx });
+      drawPaddles(game.renderState.paddles, game.countdown <= 0, { ctx });
    }
 };
 
@@ -26,10 +26,17 @@ function drawBall(ball, { ctx }) {
    ctx.fill();
 }
 
-function drawPaddles(paddles, { ctx }) {
+function drawPaddles(paddles, countdownEnded, { ctx }) {
    ctx.fillStyle = '#14cccc';
-   for (let i = 0; i < paddles.length; i++) {
-      const paddle = paddles[i];
+   for (const id of Object.keys(paddles)) {
+      const paddle = paddles[id];
+      ctx.fillStyle = '#14cccc';
       ctx.fillRect(paddle.x - paddle.width / 2, paddle.y - paddle.height / 2, paddle.width, paddle.height);
+      if (id === window.selfId && !countdownEnded) {
+         ctx.fillStyle = 'white';
+         ctx.beginPath();
+         ctx.arc(paddle.x, paddle.y - paddle.height / 2 - 20, 10, 0, Math.PI * 2);
+         ctx.fill();
+      }
    }
 }
