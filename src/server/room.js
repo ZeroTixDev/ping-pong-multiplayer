@@ -4,6 +4,8 @@ const Player = require('./player.js');
 const hash = require('../shared/hash.js');
 const { COUNTDOWN, SIMULATION_RATE } = require('../shared/constants.js');
 const initialState = require('./initialState.json');
+const simulate = require('../shared/simulate.js');
+const copy = require('../shared/copy.js');
 
 function parseState(data, paddleIds) {
    const state = Object.create(null);
@@ -37,6 +39,11 @@ module.exports = class Room {
       this.sendPackage = {};
       this.tick = 0;
       this.startTime = null;
+      this.receivedInputs = [];
+      this.states = [];
+      this.inputs = [];
+      this.stateUpdate = false;
+      this.inputPackages = [];
    }
    get playerCount() {
       return Object.keys(this.players).length;
@@ -69,6 +76,16 @@ module.exports = class Room {
    get playerIds() {
       return Object.keys(this.players);
    }
+   createEmptyInputs() {
+      const input = {};
+      this.playerIds.forEach((id) => {
+         input[id] = { up: false, down: false };
+      });
+      return input;
+   }
+   gameState() {
+      return this.states[this.tick];
+   }
    updateRoom() {
       // idk maybe do some room updating
       if (this.readyCount === this.maxPlayers && this.state !== 'game') {
@@ -76,24 +93,61 @@ module.exports = class Room {
          this.countdown = COUNTDOWN;
          this.startTime = Date.now();
          this.tick = 0;
-         this.gameState = parseState(initialState, [...this.playerIds]);
+         this.states = [{ ...parseState(initialState, [...this.playerIds]) }];
+         this.inputs = [{ ...this.createEmptyInputs() }];
+         this.receivedInputs = [];
          this.sendPackage['change'] = 'game';
          this.sendPackage['start'] = this.startTime;
-         this.sendPackage['state'] = this.gameState;
+         this.sendPackage['initState'] = this.states[0];
+         this.sendPackage['initInput'] = this.inputs[0];
       }
       if (this.state === 'game') {
          this.gameUpdate();
       }
    }
+   handleInputs(inputs, playerId) {
+      inputs.forEach((input) => {
+         this.receivedInputs.push({ ...input, id: playerId });
+      });
+   }
+   sameInput(input1, input2) {
+      return input1.up === input2.up && input1.down === input2.down;
+   }
    gameUpdate() {
       const expectedTick = Math.ceil((Date.now() - this.startTime) / (1000 / SIMULATION_RATE));
       const delta = 1 / SIMULATION_RATE;
 
+      if (this.receivedInputs.length > 0) {
+         this.sendPackage['inputs'] = [...this.receivedInputs];
+      }
+
+      this.receivedInputs.forEach((data) => {
+         if (this.inputs[data.tick] === undefined) {
+            this.inputs[data.tick] = Object.create(null);
+         }
+         this.inputs[data.tick][data.id] = data.input;
+         this.tick = Math.min(this.tick, data.tick);
+      });
+
+      this.receivedInputs = [];
+
       while (this.tick < expectedTick) {
+         let onCountdown = false;
          if (this.countdown > 0) {
             this.countdown -= delta;
+            onCountdown = this.countdown > 0;
          } else {
             this.countdown = 0;
+         }
+         if (!onCountdown) {
+            // actual updating of the game!!!
+            this.states[this.tick + 1] = simulate(this.states[this.tick], this.inputs[this.tick]);
+            if (this.inputs[this.tick + 1] === undefined) {
+               this.inputs[this.tick + 1] = Object.create(null);
+            }
+         } else {
+            this.states[this.tick + 1] = copy(this.states[this.tick]);
+            this.inputs[this.tick + 1] = copy(this.inputs[this.tick]);
          }
          this.tick++;
       }

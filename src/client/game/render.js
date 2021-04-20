@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = function Render({ game, ctx, canvas }) {
-   ctx.fillStyle = '#383E53';
+   ctx.fillStyle = '#202130';
    ctx.fillRect(0, 0, canvas.width, canvas.height);
    if (game === undefined) return;
    if (game.countdown !== undefined || game.countdownAlpha + 0.5 <= 0) {
@@ -14,8 +14,8 @@ module.exports = function Render({ game, ctx, canvas }) {
       ctx.globalAlpha = 1;
    }
    if (game.state !== undefined) {
-      drawBall(game.state.ball, { ctx });
-      drawPaddles(Object.values(game.state.paddles), { ctx });
+      drawBall(game.renderState.ball, { ctx });
+      drawPaddles(Object.values(game.renderState.paddles), { ctx });
    }
 };
 

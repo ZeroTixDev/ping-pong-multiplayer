@@ -119,7 +119,12 @@ function removeRoom(id) {
 
 function newMessage({ data, id }) {
    const client = clients[id];
-   console.log(data, data.type, 'client state', client.state);
+   if (data.inputs === undefined) {
+      console.log(data, data.type, 'client state', client.state);
+   }
+   if (data.inputs !== undefined && client.state === 'in-game') {
+      state.rooms[client.roomId].handleInputs(data.inputs, client.id);
+   }
    if (data.type === 'rooms' && client.state === 'connecting') {
       client.send({ type: 'rooms', data: Object.values(state.packRooms()) });
       client.inGameMenu(); // changes state to being in game menu

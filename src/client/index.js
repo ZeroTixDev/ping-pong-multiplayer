@@ -7,15 +7,19 @@ const hash = require('../shared/hash.js');
 const typeWriter = require('./util/typeWriter.js');
 const resize = require('./util/resize.js');
 const Game = require('./game/game.js');
-const { COUNTDOWN } = require('../shared/constants.js');
+const { COUNTDOWN, controls } = require('../shared/constants.js');
+const copy = require('../shared/copy.js');
 
 let rooms = null;
 let roomId = null;
-let selfId = null;
+window.selfId = null;
 let game = null;
 window.gameState = null;
+window.currentInput = { up: false, down: false };
+window.lastInput = { up: false, down: false };
 let state = null; // THIS IS NULL
 window.gameRaf = null;
+window.extraLag = 0;
 
 window.addEventListener('load', () => {
    handleNetworkRequestsAndText();
@@ -30,7 +34,25 @@ window.addEventListener('keydown', (event) => {
    if (state === 'chat' && document.activeElement !== ref.chatInput && event.code.toLowerCase() === 'enter') {
       ref.chatInput.focus();
    }
+   if (state === 'game') {
+      trackKeys(event);
+   }
 });
+
+window.addEventListener('keyup', (event) => {
+   if (state === 'game') {
+      trackKeys(event);
+   }
+});
+
+function trackKeys(event) {
+   if (event.repeat) return;
+   const control = controls[event.code];
+   if (control === undefined) return;
+   if (control.movement) {
+      window.currentInput[control.name] = event.type === 'keydown';
+   }
+}
 
 function gameLoop() {
    Game.Render(Game.Update(window.gameState));
@@ -162,32 +184,34 @@ ref.createBackButton.addEventListener('mousedown', () => {
    });
 });
 
-function openFullscreen() {
-   const elem = document.documentElement;
-   if (elem.requestFullscreen) {
-      elem.requestFullscreen();
-   } else if (elem.webkitRequestFullscreen) {
-      /* Safari */
-      elem.webkitRequestFullscreen();
-   } else if (elem.msRequestFullscreen) {
-      /* IE11 */
-      elem.msRequestFullscreen();
-   }
-}
-function closeFullscreen() {
-   if (document.exitFullscreen) {
-      document.exitFullscreen();
-   } else if (document.webkitExitFullscreen) {
-      /* Safari */
-      document.webkitExitFullscreen();
-   } else if (document.msExitFullscreen) {
-      /* IE11 */
-      document.msExitFullscreen();
-   }
-}
+// function openFullscreen() {
+//    const elem = document.documentElement;
+//    if (elem.requestFullscreen) {
+//       elem.requestFullscreen();
+//    } else if (elem.webkitRequestFullscreen) {
+//       /* Safari */
+//       elem.webkitRequestFullscreen();
+//    } else if (elem.msRequestFullscreen) {
+//       /* IE11 */
+//       elem.msRequestFullscreen();
+//    }
+// }
+// function closeFullscreen() {
+//    if (document.exitFullscreen) {
+//       document.exitFullscreen();
+//    } else if (document.webkitExitFullscreen) {
+//       /* Safari */
+//       document.webkitExitFullscreen();
+//    } else if (document.msExitFullscreen) {
+//       /* IE11 */
+//       document.msExitFullscreen();
+//    }
+// }
 
 function serverMessage(msg) {
-   console.log(msg);
+   if (!msg.state && !msg.inputs) {
+      console.log(msg);
+   }
    if (msg.type === 'my-room-update') {
       const roomData = msg.data;
       ref.playerCount.innerText = `${roomData.playerCount} / ${roomData.maxPlayers}`;
@@ -216,7 +240,20 @@ function serverMessage(msg) {
          ref.forfeitButton.classList.remove('button-disable');
          ref.chat.classList.add('hidden');
          state = 'game';
-         window.gameState = {};
+         window.currentInput = { up: false, down: false };
+         window.lastInput = { up: false, down: false };
+         window.gameState = {
+            inputs: [],
+            pendingInputs: [],
+            states: [],
+            lastTime: 0,
+            poll: function () {
+               return [...this.pendingInputs];
+            },
+            state() {
+               return this.states[this.tick];
+            },
+         };
          // openFullscreen();
          startGame();
       }
@@ -235,9 +272,23 @@ function serverMessage(msg) {
       window.gameState.countdownAlpha = 1;
       window.gameState.countdown = COUNTDOWN; // msg countdown refers to the date.now on which server sent
    }
-   if (msg.state !== undefined) {
-      console.log(msg.state);
-      window.gameState.state = msg.state;
+   if (msg.initState !== undefined) {
+      window.gameState.hasInitState = true;
+      window.gameState.states[0] = copy(msg.initState);
+      window.gameState.renderState = copy(msg.initState);
+   }
+   if (msg.initInput !== undefined) {
+      window.gameState.hasInitInput = true;
+      window.gameState.inputs[0] = copy(msg.initInput);
+   }
+   if (msg.inputs !== undefined) {
+      setTimeout(() => {
+         msg.inputs.forEach((input) => {
+            if (input.id !== window.selfId) {
+               window.gameState.pendingInputs.push(input);
+            }
+         });
+      }, window.extraLag);
    }
    if (msg.type === 'chat-update') {
       const messages = msg.messages;

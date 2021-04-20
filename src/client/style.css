@@ -431,7 +431,7 @@ input:checked + .slider:before {
 	justify-content: center;
 	align-items: center;
 	overflow: hidden;
-	background-color: #202130;
+	background-color: #383E53;
 }
 
 .forfeit {
@@ -447,6 +447,9 @@ canvas {
 	left: 0;
 	top: 0;
 	background-color: white;
+	outline: none;
+	border: 5px solid white;
+	transform: scale(0.8);
 }
 
 .gui {
