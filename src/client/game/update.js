@@ -40,8 +40,6 @@ module.exports = function Update(game) {
 
    // window.lastInput = copy(input);
 
-   game.pendingInputs = [];
-
    game.pendingChats.forEach((data) => {
       game.states[game.tick].paddles[data.id].text = phrases[data.number];
       game.states[game.tick].paddles[data.id].textOpacity = 2;
@@ -55,6 +53,7 @@ module.exports = function Update(game) {
       game.tick = Math.min(game.tick, data.tick);
    });
 
+   game.pendingInputs = [];
    game.pendingChats = [];
 
    const inputPackages = [];

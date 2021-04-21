@@ -60,7 +60,7 @@ module.exports = function simulate(oldState, inputs) {
          paddle.lastInput = {};
          paddle.lastInput.up = input.up;
          paddle.lastInput.down = input.down;
-      } else if (input === undefined || input?.up === undefined || input?.down === undefined) {
+      } else if (input === undefined || input.up === undefined || input.down === undefined) {
          if (paddle.lastInput !== undefined) {
             paddle.lastInput.up *= INPUT_DECAY;
             paddle.lastInput.down *= INPUT_DECAY;
