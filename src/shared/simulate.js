@@ -9,19 +9,30 @@ const {
    PADDLE_FRICTION,
    BALL_MAX_SPEED,
    INPUT_DECAY,
+   phrases,
 } = require('./constants.js');
+
+function intersectRectCircle(rect, circle) {
+   const cx = Math.abs(circle.x - rect.x);
+   const xDist = rect.width / 2 + circle.radius;
+   if (cx > xDist) return false;
+   const cy = Math.abs(circle.y - rect.y);
+   const yDist = rect.height / 2 + circle.radius;
+   if (cy > yDist) return false;
+   if (cx <= rect.width / 2 || cy <= rect.height / 2) return true;
+   const xCornerDist = cx - rect.width / 2;
+   const yCornerDist = cy - rect.height / 2;
+   const xCornerDistSq = xCornerDist * xCornerDist;
+   const yCornerDistSq = yCornerDist * yCornerDist;
+   const maxCornerDistSq = circle.radius * circle.radius;
+   return xCornerDistSq + yCornerDistSq <= maxCornerDistSq;
+}
 
 module.exports = function simulate(oldState, inputs) {
    const state = copy(oldState);
    const delta = 1 / SIMULATION_RATE;
 
-   if (state.ball.xv === undefined) {
-      state.ball.xv = 600;
-   }
-   if (state.ball.yv === undefined) {
-      state.ball.yv = -300;
-   }
-
+   state.won = false;
    if (state.ball.xv > BALL_MAX_SPEED) {
       state.ball.xv = BALL_MAX_SPEED;
    }
@@ -37,9 +48,6 @@ module.exports = function simulate(oldState, inputs) {
    state.ball.x += state.ball.xv * delta;
    state.ball.y += state.ball.yv * delta;
 
-   if (state.ball.x - state.ball.radius < 0 || state.ball.x + state.ball.radius > CANVAS_WIDTH) {
-      state.ball.xv *= -1;
-   }
    if (state.ball.y - state.ball.radius < 0 || state.ball.y + state.ball.radius > CANVAS_HEIGHT) {
       state.ball.yv *= -1;
    }
@@ -47,17 +55,18 @@ module.exports = function simulate(oldState, inputs) {
    for (const paddleId of Object.keys(state.paddles)) {
       const paddle = state.paddles[paddleId];
       if (paddle === undefined) continue;
-      if (paddle.accel === undefined) {
-         paddle.accel = { x: 0, y: 0 };
-      }
       let input = inputs[paddleId];
       if (input !== undefined) {
-         paddle.lastInput = copy(input);
-      } else if (input === undefined) {
+         paddle.lastInput = {};
+         paddle.lastInput.up = input.up;
+         paddle.lastInput.down = input.down;
+      } else if (input === undefined || input?.up === undefined || input?.down === undefined) {
          if (paddle.lastInput !== undefined) {
             paddle.lastInput.up *= INPUT_DECAY;
             paddle.lastInput.down *= INPUT_DECAY;
-            input = copy(paddle.lastInput);
+            input = {};
+            input.up = paddle.lastInput.up;
+            input.down = paddle.lastInput.down;
          }
       }
       if (input !== undefined) {
@@ -68,8 +77,15 @@ module.exports = function simulate(oldState, inputs) {
             paddle.accel.y += SPEED * delta * input.down;
          }
       }
+      if (paddle.text !== undefined) {
+         paddle.textOpacity -= delta;
+         if (paddle.textOpacity <= 0) {
+            paddle.text = undefined;
+         }
+      }
       paddle.accel.y *= Math.pow(PADDLE_FRICTION, delta * 20);
       paddle.y += paddle.accel.y * 20 * delta;
+      paddle.height += 2 * delta;
       if (paddle.y > CANVAS_HEIGHT - paddle.height / 2) {
          paddle.y = CANVAS_HEIGHT - paddle.height / 2;
          paddle.accel.x = 0;
@@ -78,48 +94,36 @@ module.exports = function simulate(oldState, inputs) {
          paddle.y = paddle.height / 2;
          paddle.accel.y = 0;
       }
-      if (state.ball.x < CANVAS_WIDTH / 2) {
-         if (
-            state.ball.x - state.ball.radius < paddle.x + paddle.width / 2 &&
-            state.ball.x + state.ball.radius > paddle.x - paddle.width / 2 &&
-            state.ball.y - state.ball.radius < paddle.y + paddle.height / 2 &&
-            state.ball.y + state.ball.radius > paddle.y - paddle.height / 2
-         ) {
-            state.ball.xv *= -1.03;
-            paddle.height -= 25;
-            if (paddle.height < 100) {
-               paddle.height = 100;
-            }
-            state.ball.x = paddle.x + paddle.width / 2 + state.ball.radius;
-         }
-      } else {
-         if (
-            state.ball.x + state.ball.radius > paddle.x - paddle.width / 2 &&
-            state.ball.x - state.ball.radius < paddle.x + paddle.width / 2 &&
-            state.ball.y - state.ball.radius < paddle.y + paddle.height / 2 &&
-            state.ball.y + state.ball.radius > paddle.y - paddle.height / 2
-         ) {
-            state.ball.xv *= -1.03;
-            paddle.height -= 25;
-            if (paddle.height < 100) {
-               paddle.height = 100;
-            }
-            state.ball.x = paddle.x - paddle.width / 2 - state.ball.radius;
+      if (intersectRectCircle(paddle, state.ball)) {
+         state.ball.xv *= -1.08;
+         paddle.height -= 50;
+         if (paddle.height < paddle.width) {
+            paddle.height = paddle.width;
          }
       }
+      // its not 0 because i want the prevent fake wins as much as possible ()
+      if (
+         (paddle.x < CANVAS_WIDTH / 2 && state.ball.x + state.ball.radius < -500) ||
+         (paddle.x > CANVAS_WIDTH / 2 && state.ball.x + state.ball.radius > CANVAS_WIDTH + 500)
+      ) {
+         state.won = true;
+         state.scores[paddleId]++;
+         state.ball.x = CANVAS_WIDTH / 2;
+         state.ball.y = CANVAS_HEIGHT / 2;
+         if (state.ball.x + state.ball.radius < -500) {
+            state.ball.xv = state.ball.speed;
+         }
+         if (state.ball.x + state.ball.radius > CANVAS_WIDTH + 500) {
+            state.ball.xv = -state.ball.speed;
+         }
+         for (const paddle of Object.values(state.paddles)) {
+            paddle.y = CANVAS_HEIGHT / 2;
+            paddle.accel = { x: 0, y: 0 };
+            paddle.lastInput = { up: false, down: false };
+         }
+         break;
+      }
    }
-   // if (state.ball.x - state.ball.radius <= 0) {
-   //    state.ball.x = CANVAS_WIDTH / 2;
-   //    state.ball.y = CANVAS_HEIGHT / 2;
-   //    state.ball.xv = 100;
-   //    state.ball.yv = -200;
-   // }
-   // if (state.ball.x + state.ball.radius >= CANVAS_WIDTH) {
-   // 	state.ball.x = CANVAS_WIDTH / 2;
-   //    state.ball.y = CANVAS_HEIGHT / 2;
-   //    state.ball.xv = -100;
-   //    state.ball.yv = -200;
-   // }
 
    return state;
 };

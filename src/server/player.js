@@ -13,6 +13,7 @@ module.exports = class Player {
       return {
          name: this.name,
          id: this.id,
+         ready: this.ready,
       };
    }
 };

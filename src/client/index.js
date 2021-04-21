@@ -13,7 +13,7 @@ const copy = require('../shared/copy.js');
 let rooms = null;
 let roomId = null;
 window.selfId = null;
-let game = null;
+window.game = null;
 window.gameState = null;
 window.currentInput = { up: false, down: false };
 window.lastInput = { up: false, down: false };
@@ -55,6 +55,17 @@ function trackKeys(event) {
    if (control.movement) {
       window.currentInput[control.name] = event.type === 'keydown';
    }
+   if (control.forfeit && event.type === 'keydown') {
+      send({ type: 'forfeit' });
+   }
+   if (control.gamechat && event.type === 'keydown') {
+      window.gameState.onChat = !window.gameState.onChat;
+   }
+   if (control.gameChatDigit !== undefined && event.type === 'keydown' && window.gameState.onChat) {
+      send({ type: 'game-chat', number: control.gameChatDigit });
+      window.gameState.pendingChats.push({ id: window.selfId, number: control.gameChatDigit });
+      window.gameState.onChat = false;
+   }
 }
 
 function gameLoop() {
@@ -77,12 +88,6 @@ ref.chatInput.addEventListener('keydown', (event) => {
       send({ type: 'chat', content: ref.chatInput.value });
       ref.chatInput.value = '';
    }
-});
-
-ref.forfeitButton.addEventListener('mousedown', () => {
-   if (state !== 'game') return;
-   send({ type: 'forfeit' });
-   ref.forfeitButton.classList.add('button-disable');
 });
 
 ref.leaveButton.addEventListener('mousedown', () => {
@@ -212,19 +217,18 @@ ref.createBackButton.addEventListener('mousedown', () => {
 // }
 
 function serverMessage(msg) {
-   if (!msg.state && !msg.inputs) {
+   if (!msg.state && !msg.inputs && !msg.ping) {
       console.log(msg);
    }
    if (msg.ping !== undefined) {
-      pings.push(msg.ping);
-      if (pings.length > 20) {
+      if (pings.length > 50) {
          pings.shift();
       }
+      pings.push(Date.now() - msg.ping);
       ref.pingText.innerText = `${Math.round(pings.reduce((a, b) => a + b) / pings.length)}`;
    }
    if (msg.type === 'my-room-update') {
       const roomData = msg.data;
-      ref.playerCount.innerText = `${roomData.playerCount} / ${roomData.maxPlayers}`;
       if (roomData.playerCount !== undefined) {
          game.playerCount = roomData.playerCount;
       }
@@ -243,11 +247,30 @@ function serverMessage(msg) {
          game.readyCount = roomData.readyCount;
          ref.readyCounter.innerText = `${game.readyCount} / ${game.maxPlayers}`;
       }
+      ref.playerCount.innerText = `${roomData.playerCount} / ${roomData.maxPlayers}`;
+      if (game.readyCount === game.maxPlayers || Object.keys(game.players).length === game.readyCount) {
+         ref.playersNotReady.innerText = 'nothing';
+      } else {
+         const notReadyNames = [];
+         for (const player of Object.values(game.players)) {
+            if (!player.ready) {
+               notReadyNames.push(player.name);
+            }
+         }
+         let nameString = '';
+         for (let i = 0; i < notReadyNames.length; i++) {
+            const name = notReadyNames[i];
+            nameString += name;
+            if (i !== notReadyNames.length - 1) {
+               nameString += ', ';
+            }
+         }
+         ref.playersNotReady.innerText = `${nameString}`;
+      }
    }
    if (msg.change !== undefined) {
       if (msg.change === 'game') {
          ref.game.classList.remove('hidden');
-         ref.forfeitButton.classList.remove('button-disable');
          ref.chat.classList.add('hidden');
          state = 'game';
          window.currentInput = { up: false, down: false };
@@ -255,8 +278,10 @@ function serverMessage(msg) {
          window.gameState = {
             inputs: [],
             pendingInputs: [],
+            pendingChats: [],
             states: [],
             lastTime: 0,
+            onChat: false,
             poll: function () {
                return [...this.pendingInputs];
             },
@@ -275,6 +300,10 @@ function serverMessage(msg) {
          window.gameState = null;
          endGame();
       }
+      if (msg.change === 'rooms') {
+         ref.chat.classList.add('hidden');
+         ref.menu.classList.remove('hidden');
+      }
    }
    if (msg.start !== undefined) {
       window.gameState.startTime = msg.start;
@@ -291,7 +320,7 @@ function serverMessage(msg) {
       window.gameState.hasInitInput = true;
       window.gameState.inputs[0] = copy(msg.initInput);
    }
-   if (msg.inputs !== undefined) {
+   if (msg.inputs !== undefined && window.gameState !== null) {
       setTimeout(() => {
          msg.inputs.forEach((input) => {
             if (input.id !== window.selfId) {
@@ -299,6 +328,13 @@ function serverMessage(msg) {
             }
          });
       }, window.extraLag);
+   }
+   if (msg.chats !== undefined && window.gameState !== null) {
+      msg.chats.forEach((data) => {
+         if (data.id !== window.selfId) {
+            window.gameState.pendingChats.push(data);
+         }
+      });
    }
    if (msg.type === 'chat-update') {
       const messages = msg.messages;

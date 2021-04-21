@@ -6,7 +6,7 @@
 body {
 	font-size:16px;
 	font-family: 'Lexend', sans-serif;
-	background-color: #15131c;
+	background-color: #18182b;
 	user-select: none;
 }
 
@@ -22,7 +22,7 @@ body {
 	top: 0;
 	height: 60px;
 	width: 100vw;
-	background-color: rgba(5, 4, 8, 0.4);
+	background-color: rgba(10, 8, 16, 0.6);
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -89,7 +89,7 @@ body {
 	top: 10%;
 	width: 80%;
 	height: 80%;
-	background-color: rgba(12, 9, 20, 0.4);
+	background-color: rgba(23, 19, 48, 0.4);
 }
 
 .overflow {
@@ -115,7 +115,7 @@ body {
 	width: 100vw;
 	height: 100vh;
 	z-index: 500;
-	background-color: rgba(0, 0, 0, 0.95);
+	background-color: rgba(0, 0, 0, 0.6);
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -217,7 +217,7 @@ body {
 }
 
 .room:hover {
-	background-color: rgba(11, 10, 20, 0.9);
+	background-color: rgba(15, 14, 31, 0.4);
 }
 
 .rooms .loader {
@@ -245,7 +245,7 @@ button {
 	align-items:center;
 	flex-direction: column;
 	color: white;
-	background-color: #15131c;
+	background-color: #3d4059;
 	filter: saturate(150%);
 	min-height: 100vh;
 	min-width: 100vw;
@@ -345,7 +345,7 @@ input:checked + .slider:before {
 	top: 0;
 	width: 100vw;
 	height: 100vh;
-	background-color: #383E53;
+	background-color: #4f5169;
 	overflow: hidden;
 	transition: opacity 0.3s linear;
 	overflow: hidden;
@@ -363,7 +363,7 @@ input:checked + .slider:before {
 
 
 .chat-div {
-	background-color: #312D4A;
+	background-color: #444061;
 	position: absolute;
 	left: 0;
 	top: 60vh;
@@ -412,12 +412,17 @@ input:checked + .slider:before {
 	position: absolute;
 	left: 0;
 	bottom: 0;
-	background-color: rgba(28, 27, 56, 0.7	);
+	background-color: rgba(38, 34, 61, 0.7	);
 	width: 100vw;
 	height: 45px;
 	border: none;
 	outline: none;
 	color: white;
+}
+
+
+.players-not-ready {
+	color: #060d63;
 }
 
 
@@ -431,12 +436,13 @@ input:checked + .slider:before {
 	justify-content: center;
 	align-items: center;
 	overflow: hidden;
-	background-color: #383E53;
+	background-color: #3f4a63;
 }
 
 .forfeit {
 	position: absolute;
 	bottom: 0;
+	right: 0;
 	background-color: red;
 	color: white;
 	font-size: 1.5rem;
@@ -456,8 +462,7 @@ canvas {
 	top: 0;
 	background-color: white;
 	outline: none;
-	border: 5px solid white;
-	transform: scale(0.8);
+	border: 3px solid white;
 }
 
 .gui {
@@ -524,6 +529,7 @@ canvas {
 	position: absolute;
 	height: 150px;
 	width: 20px;
+	border-radius: 5px;
 	background-color: #14cccc;
 }
 
@@ -605,7 +611,7 @@ canvas {
 	width: 100px;
 	height: 100px;
 	border-radius:50%;
-	border: 15px solid #15131c;
+	border: 15px solid #18182b;
 	border-bottom: 15px solid white;
 	border-right: 15px solid white;
 	transform: rotate(0deg);
@@ -657,46 +663,18 @@ canvas {
 
 
 .effect-1 {
-	 animation: foolishIn 2.5s ease-in-out;
+	 animation: foolishIn 0.5s ease-in-out;
 }
 
  @keyframes foolishIn {
-	 0% {
-		 opacity: 0;
-		 -webkit-transform-origin: 50% 50%;
-		 transform-origin: 50% 50%;
-		 -webkit-transform: scale(0, 0) rotate(360deg);
-		 transform: scale(0, 0) rotate(360deg);
-	}
-	 20% {
-		 opacity: 1;
-		 -webkit-transform-origin: 0% 100%;
-		 transform-origin: 0% 100%;
-		 -webkit-transform: scale(0.5, 0.5) rotate(0deg);
-		 transform: scale(0.5, 0.5) rotate(0deg);
-	}
-	 40% {
-		 opacity: 1;
-		 -webkit-transform-origin: 100% 100%;
-		 transform-origin: 100% 100%;
-		 -webkit-transform: scale(0.5, 0.5) rotate(0deg);
-		 transform: scale(0.5, 0.5) rotate(0deg);
-	}
-	 60% {
-		 opacity: 1;
-		 -webkit-transform-origin: 0%;
-		 transform-origin: 0%;
-		 -webkit-transform: scale(0.5, 0.5) rotate(0deg);
-		 transform: scale(0.5, 0.5) rotate(0deg);
-	}
-	 80% {
+	0% {
 		 opacity: 1;
 		 -webkit-transform-origin: 0% 0%;
-		 transform-origin: 0% 0%;
+		 transform-origin: 25% 25%;
 		 -webkit-transform: scale(0.5, 0.5) rotate(0deg);
 		 transform: scale(0.5, 0.5) rotate(0deg);
 	}
-	 100% {
+	100% {
 		 opacity: 1;
 		 -webkit-transform-origin: 50% 50%;
 		 transform-origin: 50% 50%;

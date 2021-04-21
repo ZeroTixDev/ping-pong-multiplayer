@@ -55,9 +55,6 @@ wss.on('connection', (socket, _request) => {
          const room = state.rooms[clients[clientId].roomId];
          if (room !== undefined) {
             room.removePlayer(clientId);
-            if (clients[clientId].id === room.host) {
-               removeRoom(room.id);
-            }
          }
       }
       delete clients[clientId];
@@ -103,6 +100,9 @@ function Send() {
          }
       }
       room.resetAfterSend();
+      if (room.toDelete) {
+         removeRoom(room.id);
+      }
    }
 }
 
@@ -119,11 +119,14 @@ function removeRoom(id) {
 
 function newMessage({ data, id }) {
    const client = clients[id];
-   if (data.inputs === undefined) {
+   if (data.inputs === undefined && data.ping === undefined && data.type !== 'game-chat') {
       console.log(data, data.type, 'client state', client.state);
    }
-   if (data.inputs !== undefined && client.state === 'in-game') {
+   if (data.inputs !== undefined && client.state === 'in-game' && state.rooms[client.roomId] !== undefined) {
       state.rooms[client.roomId].handleInputs(data.inputs, client.id);
+   }
+   if (data.type === 'game-chat' && client.state === 'in-game' && state.rooms[client.roomId] !== undefined) {
+      state.rooms[client.roomId].handleNumber(data.number, client.id);
    }
    if (data.type === 'rooms' && client.state === 'connecting') {
       client.send({ type: 'rooms', data: Object.values(state.packRooms()) });
@@ -131,7 +134,7 @@ function newMessage({ data, id }) {
       console.log('sent room data');
    }
    if (data.ping !== undefined) {
-      client.send({ ping: Date.now() - data.ping });
+      client.send({ ping: data.ping });
    }
    if (data.type === 'leave-room' && client.state === 'in-game') {
       const room = state.rooms[client.roomId];
@@ -187,7 +190,6 @@ function newMessage({ data, id }) {
       });
       client.username = removeTags(data.username) || '';
       room.addPlayer(client);
-      room.talk('SERVER', `${client.username} has joined!`);
       client.enterGame(room.id);
       client.send({ type: 'success', selfId: client.id, initPack: room.initPack() });
    }
@@ -231,35 +233,11 @@ addRoom(
 
 addRoom(
    {
-      name: 'Testing room',
-      desc: 'Room Testing hehe',
-      maxPlayers: 2,
-      players: [],
-      private: true,
-      password: 'imagine',
-   },
-   uniqueId(Object.keys(state.rooms))
-);
-
-addRoom(
-   {
       name: 'Noobs',
       desc: 'A lobby for noobs!',
       maxPlayers: 2,
       players: [],
       private: false,
-   },
-   uniqueId(Object.keys(state.rooms))
-);
-
-addRoom(
-   {
-      name: 'Dev room',
-      desc: 'Dev Room :)',
-      maxPlayers: 2,
-      players: [],
-      private: true,
-      password: 'dev!!',
    },
    uniqueId(Object.keys(state.rooms))
 );

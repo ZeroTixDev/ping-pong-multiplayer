@@ -34,6 +34,7 @@ module.exports = {
    game: document.querySelector('.game'),
    canvas: document.querySelector('.game-canvas'),
    gui: document.querySelector('.gui'),
-   forfeitButton: document.querySelector('.forfeit'),
+   // forfeitButton: document.querySelector('.forfeit'),
    pingText: document.querySelector('.ping-text'),
+   playersNotReady: document.querySelector('.players-not-ready'),
 };

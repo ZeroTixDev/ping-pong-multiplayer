@@ -2,7 +2,7 @@
 
 const Player = require('./player.js');
 const hash = require('../shared/hash.js');
-const { COUNTDOWN, SIMULATION_RATE } = require('../shared/constants.js');
+const { COUNTDOWN, SIMULATION_RATE, POINTS_TO_WIN } = require('../shared/constants.js');
 const initialState = require('./initialState.json');
 const simulate = require('../shared/simulate.js');
 const copy = require('../shared/copy.js');
@@ -13,10 +13,19 @@ function parseState(data, paddleIds) {
    if (data.paddles) {
       for (let i = 0; i < data.paddles.length; i++) {
          state.paddles[paddleIds[i]] = data.paddles[i];
+         state.paddles[paddleIds[i]].accel = { x: 0, y: 0 };
       }
    }
    if (data.ball) {
       state.ball = data.ball;
+      state.ball.xv = Math.random() < 0.5 ? -data.ball.speed : data.ball.speed;
+      state.ball.yv = (Math.random() * -2 + 1) * (data.ball.speed * 0.6);
+   }
+   if (data.scores) {
+      state.scores = {};
+      for (let i = 0; i < paddleIds.length; i++) {
+         state.scores[paddleIds[i]] = data.scores[i] || 0;
+      }
    }
    return state;
 }
@@ -35,6 +44,7 @@ module.exports = class Room {
       this.readyCount = 0;
       this.countdown = COUNTDOWN;
       this.pendingChatMessages = []; // [{ author: string, content: string }]
+      this.pendingPrivateMessages = [];
       this.update = false;
       this.sendPackage = {};
       this.tick = 0;
@@ -44,6 +54,8 @@ module.exports = class Room {
       this.inputs = [];
       this.stateUpdate = false;
       this.inputPackages = [];
+      this.pendingChatNumbers = [];
+      this.toDelete = false;
    }
    get playerCount() {
       return Object.keys(this.players).length;
@@ -51,8 +63,14 @@ module.exports = class Room {
    get sentAllMessages() {
       return !(this.pendingChatMessages.length > 0);
    }
+   get sentAllPrivateMessages() {
+      return !(this.pendingPrivateMessages.length > 0);
+   }
    talk(playerId, content) {
       this.pendingChatMessages.push({ author: playerId, content });
+   }
+   privateTalk(playerId, content) {
+      this.pendingPrivateMessages.push({ author: playerId, content });
    }
    ready(playerId) {
       if (!this.players[playerId].ready) {
@@ -65,12 +83,24 @@ module.exports = class Room {
       if (!this.sentAllMessages) {
          client.send({ type: 'chat-update', messages: [...this.pendingChatMessages] });
       }
+      if (!this.sentAllPrivateMessages) {
+         const messages = [];
+         for (const { author, content } of this.pendingPrivateMessages) {
+            if (client.id === author) {
+               messages.push({ author: 'SERVER', content });
+            }
+         }
+         if (messages.length > 0) {
+            client.send({ type: 'chat-update', messages });
+         }
+      }
       if (Object.keys(this.sendPackage).length > 0) {
          client.send({ ...this.sendPackage });
       }
    }
    resetAfterSend() {
       this.pendingChatMessages = [];
+      this.pendingPrivateMessages = [];
       this.sendPackage = {};
    }
    get playerIds() {
@@ -88,7 +118,7 @@ module.exports = class Room {
    }
    updateRoom() {
       // idk maybe do some room updating
-      if (this.readyCount === this.maxPlayers && this.state !== 'game') {
+      if (this.readyCount === this.maxPlayers && this.state !== 'game' && !this.toDelete) {
          this.state = 'game';
          this.countdown = COUNTDOWN;
          this.startTime = Date.now();
@@ -101,14 +131,20 @@ module.exports = class Room {
          this.sendPackage['initState'] = this.states[0];
          this.sendPackage['initInput'] = this.inputs[0];
       }
-      if (this.state === 'game') {
+      if (this.state === 'game' && !this.toDelete) {
          this.gameUpdate();
+      }
+      if (this.toDelete) {
+         this.sendPackage['change'] = 'rooms';
       }
    }
    handleInputs(inputs, playerId) {
       inputs.forEach((input) => {
          this.receivedInputs.push({ ...input, id: playerId });
       });
+   }
+   handleNumber(number, playerId) {
+      this.pendingChatNumbers.push({ number, id: playerId });
    }
    sameInput(input1, input2) {
       return input1.up === input2.up && input1.down === input2.down;
@@ -119,6 +155,11 @@ module.exports = class Room {
 
       if (this.receivedInputs.length > 0) {
          this.sendPackage['inputs'] = [...this.receivedInputs];
+      }
+
+      if (this.pendingChatNumbers.length > 0) {
+         this.sendPackage['chats'] = [...this.pendingChatNumbers];
+         this.pendingChatNumbers = [];
       }
 
       this.receivedInputs.forEach((data) => {
@@ -142,6 +183,29 @@ module.exports = class Room {
          if (!onCountdown) {
             // actual updating of the game!!!
             this.states[this.tick + 1] = simulate(this.states[this.tick], this.inputs[this.tick]);
+            if (this.states[this.tick + 1].won === true) {
+               const scores = this.states[this.tick + 1].scores;
+               for (const id of Object.keys(scores)) {
+                  const score = scores[id];
+                  if (score === POINTS_TO_WIN) {
+                     this.state = 'chat';
+                     this.sendPackage['change'] = 'chat';
+                     this.readyCount = 0;
+                     for (const player of Object.values(this.players)) {
+                        player.ready = false;
+                     }
+                     this.update = true;
+                     const noobPlayer = this.players[Object.keys(scores).find((key) => scores[key] !== score)];
+                     this.talk(
+                        'SERVER',
+                        `${this.players[id].name} has won the game! ${noobPlayer.name} is noob. Score: ${score} - ${
+                           scores[noobPlayer.id]
+                        } `
+                     );
+                     break;
+                  }
+               }
+            }
             if (this.inputs[this.tick + 1] === undefined) {
                this.inputs[this.tick + 1] = Object.create(null);
             }
@@ -156,6 +220,9 @@ module.exports = class Room {
       this.update = true;
       this.players[client.id] = new Player(client);
       this.talk('SERVER', `${client.username} has joined!`);
+      if (this.host) {
+         this.privateTalk(client.id, `The host of the room is { ${this.players[this.host].name} }!`);
+      }
    }
    initPack() {
       return {
@@ -202,6 +269,9 @@ module.exports = class Room {
       }
       this.talk('SERVER', `${this.players[id].name} has left the game!`);
       delete this.players[id];
+      if (id === this.host) {
+         this.toDelete = true;
+      }
    }
    forfeit(id) {
       this.update = true;

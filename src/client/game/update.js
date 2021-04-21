@@ -5,7 +5,7 @@ const canvas = ref.canvas;
 const simulate = require('../../shared/simulate.js');
 const copy = require('../../shared/copy.js');
 const ctx = canvas.getContext('2d');
-const { SIMULATION_RATE } = require('../../shared/constants.js');
+const { SIMULATION_RATE, phrases } = require('../../shared/constants.js');
 
 module.exports = function Update(game) {
    // do something smart with game
@@ -40,6 +40,13 @@ module.exports = function Update(game) {
 
    // window.lastInput = copy(input);
 
+   game.pendingInputs = [];
+
+   game.pendingChats.forEach((data) => {
+      game.states[game.tick].paddles[data.id].text = phrases[data.number];
+      game.states[game.tick].paddles[data.id].textOpacity = 2;
+   });
+
    game.poll().forEach((data) => {
       if (game.inputs[data.tick] === undefined) {
          game.inputs[data.tick] = Object.create(null);
@@ -48,7 +55,7 @@ module.exports = function Update(game) {
       game.tick = Math.min(game.tick, data.tick);
    });
 
-   game.pendingInputs = [];
+   game.pendingChats = [];
 
    const inputPackages = [];
 
@@ -65,6 +72,20 @@ module.exports = function Update(game) {
       }
       if (!onCountdown) {
          game.states[game.tick + 1] = simulate(game.states[game.tick], game.inputs[game.tick]);
+         if (game.states[game.tick + 1].won === true) {
+            const state = copy(game.states[game.tick + 1]);
+            game.renderState.ball.x = state.ball.x;
+            game.renderState.ball.y = state.ball.y;
+            for (const id of Object.keys(game.renderState.paddles)) {
+               const paddle = game.renderState.paddles[id];
+               const realPaddle = state.paddles[id];
+               paddle.x = realPaddle.x;
+               paddle.y = realPaddle.y;
+               paddle.width = realPaddle.width;
+               paddle.height = realPaddle.height;
+            }
+            game.renderState.ball.radius = state.ball.radius;
+         }
          if (game.inputs[game.tick + 1] === undefined) {
             game.inputs[game.tick + 1] = Object.create(null);
          }
@@ -90,7 +111,7 @@ module.exports = function Update(game) {
    const realDelta = (window.performance.now() - game.lastTime) / 1000;
    game.lastTime = window.performance.now();
 
-   const lerpTime = Math.min(realDelta * (SIMULATION_RATE / 2.5), 1);
+   const lerpTime = Math.min(realDelta * (SIMULATION_RATE / 2), 1);
    game.renderState.ball.x = lerp(game.renderState.ball.x, game.state().ball.x, lerpTime);
    game.renderState.ball.y = lerp(game.renderState.ball.y, game.state().ball.y, lerpTime);
 
@@ -101,7 +122,10 @@ module.exports = function Update(game) {
       paddle.y = lerp(paddle.y, realPaddle.y, lerpTime);
       paddle.width = lerp(paddle.width, realPaddle.width, lerpTime * 0.2);
       paddle.height = lerp(paddle.height, realPaddle.height, lerpTime * 0.2);
+      paddle.text = realPaddle.text;
+      paddle.textOpacity = realPaddle.textOpacity;
    }
+   game.renderState.ball.radius = lerp(game.renderState.ball.radius, game.state().ball.radius, lerpTime * 0.2);
 
    return { game, ctx, canvas };
 };

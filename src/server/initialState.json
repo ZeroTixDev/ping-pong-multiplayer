@@ -3,19 +3,21 @@
 		{
 			"x": 100,
 			"y": 450,
-			"width": 25,
-			"height": 500
+			"width": 20,
+			"height": 300
 		},
 		{
 			"x": 1500,
 			"y": 450,
-			"width": 25,
-			"height": 500
+			"width": 20,
+			"height": 300
 		}
 	],
 	"ball": {
 		"x": 800,
 		"y": 450,
-		"radius": 25
-	}
+		"radius": 25,
+		"speed": 600
+	},
+	"scores": [0, 0]
 }

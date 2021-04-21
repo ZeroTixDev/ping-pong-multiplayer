@@ -1,6 +1,6 @@
 'use strict';
 const { CANVAS_WIDTH, CANVAS_HEIGHT } = require('../../shared/constants');
-const canvasScale = 0.8;
+const canvasScale = 0.85;
 
 module.exports = function resize(elements, func = () => {}) {
    for (const element of elements) {
