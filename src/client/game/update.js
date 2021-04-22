@@ -15,6 +15,7 @@ module.exports = function Update(game) {
       game.hasInitState === undefined ||
       game.hasInitInput === undefined
    ) {
+      console.log('we dont have enough data to simulate the game');
       return { game, ctx, canvas };
    }
 
