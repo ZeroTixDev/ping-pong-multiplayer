@@ -19,7 +19,7 @@ function parseState(data, paddleIds) {
    if (data.ball) {
       state.ball = data.ball;
       state.ball.xv = Math.random() < 0.5 ? -data.ball.speed : data.ball.speed;
-      state.ball.yv = 0; //(Math.random() * -2 + 1) * (data.ball.speed * 0.6);
+      state.ball.yv = (Math.random() * -2 + 1) * (data.ball.speed * 0.6);
    }
    if (data.scores) {
       state.scores = {};
