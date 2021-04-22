@@ -76,6 +76,10 @@ module.exports = function simulate(oldState, inputs) {
          if (input.down) {
             paddle.accel.y += SPEED * delta * input.down;
          }
+         if (input.number) {
+            paddle.text = phrases[input.number];
+            paddle.textOpacity = 2;
+         }
       }
       if (paddle.text !== undefined) {
          paddle.textOpacity -= delta;
@@ -95,6 +99,8 @@ module.exports = function simulate(oldState, inputs) {
          paddle.accel.y = 0;
       }
       if (intersectRectCircle(paddle, state.ball)) {
+         const dist = paddle.y - state.ball.y;
+         state.ball.yv += dist * -1; // here's the trick
          state.ball.xv *= -1.08;
          paddle.height -= 50;
          if (paddle.height < paddle.width) {
@@ -111,14 +117,16 @@ module.exports = function simulate(oldState, inputs) {
          state.ball.x = CANVAS_WIDTH / 2;
          state.ball.y = CANVAS_HEIGHT / 2;
          if (state.ball.x + state.ball.radius < -500) {
-            state.ball.xv = state.ball.speed;
+            state.ball.xv = state.ball.speed * 0.8;
          }
          if (state.ball.x + state.ball.radius > CANVAS_WIDTH + 500) {
-            state.ball.xv = -state.ball.speed;
+            state.ball.xv = -state.ball.speed * 0.8;
          }
+         state.ball.yv *= 1.02;
          for (const paddle of Object.values(state.paddles)) {
             paddle.y = CANVAS_HEIGHT / 2;
             paddle.accel = { x: 0, y: 0 };
+            paddle.height = 300;
             paddle.lastInput = { up: false, down: false };
          }
          break;

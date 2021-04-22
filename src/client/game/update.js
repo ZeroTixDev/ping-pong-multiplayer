@@ -40,11 +40,6 @@ module.exports = function Update(game) {
 
    // window.lastInput = copy(input);
 
-   game.pendingChats.forEach((data) => {
-      game.states[game.tick].paddles[data.id].text = phrases[data.number];
-      game.states[game.tick].paddles[data.id].textOpacity = 2;
-   });
-
    game.poll().forEach((data) => {
       if (game.inputs[data.tick] === undefined) {
          game.inputs[data.tick] = Object.create(null);
@@ -54,7 +49,6 @@ module.exports = function Update(game) {
    });
 
    game.pendingInputs = [];
-   game.pendingChats = [];
 
    const inputPackages = [];
 
@@ -71,20 +65,6 @@ module.exports = function Update(game) {
       }
       if (!onCountdown) {
          game.states[game.tick + 1] = simulate(game.states[game.tick], game.inputs[game.tick]);
-         if (game.states[game.tick + 1].won === true) {
-            const state = copy(game.states[game.tick + 1]);
-            game.renderState.ball.x = state.ball.x;
-            game.renderState.ball.y = state.ball.y;
-            for (const id of Object.keys(game.renderState.paddles)) {
-               const paddle = game.renderState.paddles[id];
-               const realPaddle = state.paddles[id];
-               paddle.x = realPaddle.x;
-               paddle.y = realPaddle.y;
-               paddle.width = realPaddle.width;
-               paddle.height = realPaddle.height;
-            }
-            game.renderState.ball.radius = state.ball.radius;
-         }
          if (game.inputs[game.tick + 1] === undefined) {
             game.inputs[game.tick + 1] = Object.create(null);
          }
@@ -99,6 +79,15 @@ module.exports = function Update(game) {
       }
       game.tick++;
    }
+
+   game.pendingChats.forEach((data) => {
+      if (game.inputs[game.tick][data.id] === undefined) {
+         game.inputs[game.tick][data.id] = Object.create(null);
+      }
+      game.inputs[game.tick][data.id].number = data.number;
+   });
+
+   game.pendingChats = [];
 
    if (inputPackages.length > 0) {
       send({
