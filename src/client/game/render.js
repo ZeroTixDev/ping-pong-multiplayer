@@ -35,7 +35,7 @@ function drawChat({ ctx, canvas }) {
    ctx.fillStyle = 'white';
    ctx.textAlign = 'center';
    ctx.textBaseline = 'middle';
-   ctx.font = '40px Lexend';
+   ctx.font = '32px Lexend';
    ctx.fillText(phraseText, canvas.width / 2, canvas.height - 40);
 }
 

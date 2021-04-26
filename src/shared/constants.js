@@ -19,6 +19,8 @@ module.exports = {
       5: 'Gotta go!',
       6: 'Thanks!',
       7: 'I give up',
+      8: 'You suck',
+      9: 'Luck.',
    },
    controls: {
       KeyW: { movement: true, name: 'up' },
@@ -34,5 +36,7 @@ module.exports = {
       Digit5: { gameChatDigit: 5 },
       Digit6: { gameChatDigit: 6 },
       Digit7: { gameChatDigit: 7 },
+      Digit8: { gameChatDigit: 8 },
+      Digit9: { gameChatDigit: 9 },
    },
 };

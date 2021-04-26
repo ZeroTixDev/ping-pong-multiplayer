@@ -45,7 +45,7 @@ module.exports = function Update(game) {
       if (game.inputs[data.tick] === undefined) {
          game.inputs[data.tick] = Object.create(null);
       }
-      game.inputs[data.tick][data.id] = data.input;
+      game.inputs[data.tick][data.id] = { ...game.inputs[data.tick][data.id], ...data.input };
       game.tick = Math.min(game.tick, data.tick);
    });
    game.pendingInputs = [];
@@ -87,10 +87,7 @@ module.exports = function Update(game) {
    }
 
    game.pendingChats.forEach((data) => {
-      if (game.inputs[game.tick][data.id] === undefined) {
-         game.inputs[game.tick][data.id] = Object.create(null);
-      }
-      game.inputs[game.tick][data.id].number = data.number;
+      game.inputs[game.tick][data.id] = { number: data.number, ...game.inputs[game.tick][data.id] };
    });
 
    game.pendingChats = [];
