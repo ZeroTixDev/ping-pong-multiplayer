@@ -117,12 +117,11 @@ module.exports = function simulate(oldState, inputs) {
          state.ball.x = CANVAS_WIDTH / 2;
          state.ball.y = CANVAS_HEIGHT / 2;
          if (state.ball.x + state.ball.radius < -500) {
-            state.ball.xv = state.ball.speed * 0.8;
+            state.ball.xv = state.ball.speed * 0.6;
          }
          if (state.ball.x + state.ball.radius > CANVAS_WIDTH + 500) {
-            state.ball.xv = -state.ball.speed * 0.8;
+            state.ball.xv = -state.ball.speed * 0.6;
          }
-         state.ball.yv *= 1.02;
          for (const paddle of Object.values(state.paddles)) {
             paddle.y = CANVAS_HEIGHT / 2;
             paddle.accel = { x: 0, y: 0 };

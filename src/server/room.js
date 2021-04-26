@@ -198,7 +198,7 @@ module.exports = class Room {
                      const noobPlayer = this.players[Object.keys(scores).find((key) => scores[key] !== score)];
                      this.talk(
                         'SERVER',
-                        `${this.players[id].name} has won the game! ${noobPlayer.name} is noob. Score: ${score} - ${
+                        `${noobPlayer.name} has won the game! ${this.players[id].name} is noob. Score: ${score} - ${
                            scores[noobPlayer.id]
                         } `
                      );
