@@ -8,7 +8,7 @@
 # Networking
 ## Results: 
 ### Pros: The game responds to inputs immediately (client prediction) regardless of the internet connection quality between the client and the game server. The ball is predicted but the server is authoriative of it. Client has no input delay and super low bandwidth and smooths the corrections.
-### Cons: Prediction can go wrong, hackable, people can make their inputs purposely delayed and jittery, when client leaves the tab, it needs to resimulate all the time that passed when it left the tab instead of using the latest server state (since its determinstic lockstep and we are only sending the inputs), times where it looks like the other paddle doesn't hit the ball then the client gets the input from the other client that he hit the ball so the ball snaps back to where it should be around now (typically in the middle).
+### Cons: Prediction can go wrong, hackable, people can make their inputs purposely delayed and jittery, when client leaves the tab, it needs to resimulate all the time that passed when it left the tab instead of using the latest server state (since its determinstic lockstep and we are only sending the inputs), times where it looks like the other paddle doesn't hit the ball then the client gets the input from the other client that he hit the ball so the ball snaps back to where it should be around now (typically in the middle), fake wins (when you have high ping)
 
 ### What should happen
 - Client presses down an arbitary key
