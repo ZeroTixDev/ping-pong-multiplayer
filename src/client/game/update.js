@@ -5,7 +5,7 @@ const canvas = ref.canvas;
 const simulate = require('../../shared/simulate.js');
 const copy = require('../../shared/copy.js');
 const ctx = canvas.getContext('2d');
-const { SIMULATION_RATE, phrases } = require('../../shared/constants.js');
+const { SIMULATION_RATE, SMOOTHING_RATE } = require('../../shared/constants.js');
 
 module.exports = function Update(game) {
    // do something smart with game
@@ -97,7 +97,7 @@ module.exports = function Update(game) {
    const realDelta = (window.performance.now() - game.lastTime) / 1000;
    game.lastTime = window.performance.now();
 
-   const lerpTime = Math.min(realDelta * (SIMULATION_RATE / 2), 1);
+   const lerpTime = Math.min(realDelta * SMOOTHING_RATE, 1);
    game.renderState.ball.x = lerp(game.renderState.ball.x, game.state().ball.x, lerpTime);
    game.renderState.ball.y = lerp(game.renderState.ball.y, game.state().ball.y, lerpTime);
 
