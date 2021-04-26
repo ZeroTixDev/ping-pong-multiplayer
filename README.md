@@ -1,4 +1,5 @@
 ## Multiplayer Ping Pong Game !!
+![picture](https://media.discordapp.net/attachments/834833750948970506/836070039831576586/unknown.png)
 ### TLDR; I wanted to make this game because ping pong is a simple game and I wanted to learn more about networking multiplayer games!
 # Networking
 ## Results: 
@@ -20,4 +21,4 @@
 
 ### The code is free and open source :D
 #### (Might refactor it later to use svelte and typescript :p)
-Notes: Sorry for the lack of comments and you can dm me if you have any questions concerning this project or the code (I respond very fast) [Discord: ZeroTix#6300, Youtube: ZeroTix (pls subscribe :D)]
+Notes: Sorry for the lack of comments and you can dm me if you have any questions concerning this project or the code (I respond very fast) [ Discord: ZeroTix#6300, Youtube: ZeroTix (pls subscribe :D) ]
