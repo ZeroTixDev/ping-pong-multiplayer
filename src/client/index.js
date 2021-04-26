@@ -192,6 +192,8 @@ ref.createBackButton.addEventListener('mousedown', () => {
    });
 });
 
+console.log('v2');
+
 // function openFullscreen() {
 //    const elem = document.documentElement;
 //    if (elem.requestFullscreen) {
@@ -216,9 +218,12 @@ ref.createBackButton.addEventListener('mousedown', () => {
 //    }
 // }
 
-function serverMessage(msg) {
+function serverMessage(msg, t) {
    if (!msg.state && !msg.inputs && !msg.ping) {
       console.log(msg);
+   }
+   if (extraLag !== 0 && !t) {
+      setTimeout(() => serverMessage(msg, true), extraLag);
    }
    if (msg.ping !== undefined) {
       if (pings.length > 50) {
@@ -321,13 +326,11 @@ function serverMessage(msg) {
       window.gameState.inputs[0] = copy(msg.initInput);
    }
    if (msg.inputs !== undefined && window.gameState !== null) {
-      setTimeout(() => {
-         msg.inputs.forEach((input) => {
-            if (input.id !== window.selfId) {
-               window.gameState.pendingInputs.push(input);
-            }
-         });
-      }, window.extraLag);
+      msg.inputs.forEach((input) => {
+         if (input.id !== window.selfId) {
+            window.gameState.pendingInputs.push(input);
+         }
+      });
    }
    if (msg.chats !== undefined && window.gameState !== null) {
       msg.chats.forEach((data) => {

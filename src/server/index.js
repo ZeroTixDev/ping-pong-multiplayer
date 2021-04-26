@@ -12,7 +12,7 @@ const wss = new WebSocket.Server({ noServer: true });
 const tickRate = 60;
 const app = express();
 const PORT = process.env.PORT || 8080;
-const server = app.listen(PORT, () => console.log(`[Server]: Listening on ${PORT}`));
+const server = app.listen(PORT, () => console.log(`[Server]: Listening on ${PORT} v2`));
 
 app.get('/', (request, result) => {
    result.sendFile(path.join(__dirname, '../../dist/index.html'));

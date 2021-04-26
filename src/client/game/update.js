@@ -48,7 +48,6 @@ module.exports = function Update(game) {
       game.inputs[data.tick][data.id] = data.input;
       game.tick = Math.min(game.tick, data.tick);
    });
-
    game.pendingInputs = [];
 
    const inputPackages = [];
@@ -81,6 +80,12 @@ module.exports = function Update(game) {
       game.tick++;
    }
 
+   if (inputPackages.length > 0) {
+      send({
+         inputs: [...inputPackages],
+      });
+   }
+
    game.pendingChats.forEach((data) => {
       if (game.inputs[game.tick][data.id] === undefined) {
          game.inputs[game.tick][data.id] = Object.create(null);
@@ -90,11 +95,6 @@ module.exports = function Update(game) {
 
    game.pendingChats = [];
 
-   if (inputPackages.length > 0) {
-      send({
-         inputs: [...inputPackages],
-      });
-   }
    // smoothing
 
    const realDelta = (window.performance.now() - game.lastTime) / 1000;
