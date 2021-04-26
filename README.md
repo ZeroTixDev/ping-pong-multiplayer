@@ -2,12 +2,9 @@
 ![picture](https://media.discordapp.net/attachments/834833750948970506/836070039831576586/unknown.png)
 ### TLDR; I wanted to make this game because ping pong is a simple game and I wanted to learn more about networking multiplayer games!
 # How to play
-## Move
-### WASD or Arrow keys
-## Forfeit
-### O
-## Quickchat
-### F
+## Move: WASD or Arrow keys
+## Forfeit: O 
+## Quickchat: F (1 - 9)
 # Networking
 ## Results: 
 ### Pros: The game responds to inputs immediately (client prediction) regardless of the internet connection quality between the client and the game server. The ball is predicted but the server is authoriative of it. Client has no input delay and super low bandwidth and smooths the corrections.
