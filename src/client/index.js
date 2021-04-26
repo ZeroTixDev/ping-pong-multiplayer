@@ -222,11 +222,12 @@ function serverMessage(msg, t) {
    if (!msg.state && !msg.inputs && !msg.ping) {
       console.log(msg);
    }
-   if (extraLag !== 0 && !t) {
-      setTimeout(() => serverMessage(msg, true), extraLag);
+   if (window.extraLag !== 0 && !t) {
+      setTimeout(() => serverMessage(msg, true), window.extraLag);
+      return;
    }
    if (msg.ping !== undefined) {
-      if (pings.length > 50) {
+      if (pings.length > 10) {
          pings.shift();
       }
       pings.push(Date.now() - msg.ping);

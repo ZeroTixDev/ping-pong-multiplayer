@@ -123,8 +123,8 @@ module.exports = function simulate(oldState, inputs) {
             state.ball.xv = -state.ball.speed * 0.6;
          }
          for (const paddle of Object.values(state.paddles)) {
-            paddle.y = CANVAS_HEIGHT / 2;
-            paddle.accel = { x: 0, y: 0 };
+            // paddle.y = CANVAS_HEIGHT / 2;
+            // paddle.accel = { x: 0, y: 0 };
             paddle.height = 300;
             paddle.lastInput = { up: false, down: false };
          }
