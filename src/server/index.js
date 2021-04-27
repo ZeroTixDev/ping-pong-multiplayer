@@ -7,6 +7,7 @@ const uniqueId = require('./util/uniqueId.js');
 const Client = require('./client.js');
 const State = require('./state.js');
 const Room = require('./room.js');
+const Loop = require('accurate-game-loop');
 
 const wss = new WebSocket.Server({ noServer: true });
 const tickRate = 60;
@@ -62,7 +63,16 @@ wss.on('connection', (socket, _request) => {
 });
 
 // room update loop
-setInterval(() => {
+new Loop(() => {
+   RoomUpdate();
+}, 1).start();
+//game loop
+new Loop(() => {
+   Update();
+   Send();
+}, tickRate).start();
+
+function RoomUpdate() {
    if (!state.roomChange && !state.roomUpdated) return;
    const roomData = state.packRooms();
    for (const client of Object.values(clients)) {
@@ -77,13 +87,7 @@ setInterval(() => {
    }
    state.finishUpdating();
    state.roomChange = false;
-}, 1000);
-
-//game loop
-setInterval(() => {
-   Update();
-   Send();
-}, 1000 / tickRate);
+}
 
 function Update() {
    for (const room of Object.values(state.rooms)) {
