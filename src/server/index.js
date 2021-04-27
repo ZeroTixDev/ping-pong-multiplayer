@@ -153,7 +153,7 @@ function newMessage({ data, id }) {
    if (data.type === 'ready' && client.state === 'in-game') {
       state.rooms[client.roomId].ready(client.id);
    }
-   if (data.type === 'chat' && client.state === 'in-game') {
+   if (data.type === 'chat' && client.state === 'in-game' && !whiteSpaceTest(data.content)) {
       state.rooms[client.roomId].talk(client.id, removeTags(data.content));
    }
    if (data.type === 'forfeit' && client.state === 'in-game') {
@@ -173,7 +173,7 @@ function newMessage({ data, id }) {
          room.talk('SERVER', `${client.username} has joined!`);
          client.send({ type: 'password-right' });
       }
-      if (data.password === undefined && room.playerCount + 1 <= room.maxPlayers) {
+      if (data.password === undefined && room.playerCount + 1 <= room.maxPlayers && !whiteSpaceTest(data.username)) {
          if ((room.private && client.password !== null && client.password === room._password) || !room.private) {
             console.log('player joined lobby');
             client.username = removeTags(data.username) || '';
@@ -183,7 +183,12 @@ function newMessage({ data, id }) {
          }
       }
    }
-   if (data.type === 'create-room' && client.state === 'game-menu' && validRoomData(data)) {
+   if (
+      data.type === 'create-room' &&
+      client.state === 'game-menu' &&
+      validRoomData(data) &&
+      !whiteSpaceTest(data.username)
+   ) {
       const room = addRoom({
          name: removeTags(data.name),
          desc: removeTags(data.desc),
@@ -210,7 +215,7 @@ function validRoomData(data) {
 }
 
 function whiteSpaceTest(string) {
-   return /\S/.test(string);
+   return /\S/.test(string) && /\u202E/.test(string);
 }
 
 addRoom(
