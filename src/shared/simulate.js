@@ -99,8 +99,8 @@ module.exports = function simulate(oldState, inputs) {
          paddle.accel.y = 0;
       }
       if (intersectRectCircle(paddle, state.ball)) {
-         const dist = ((paddle.y - state.ball.y) / paddle.height) * 100;
-         state.ball.yv += dist * -4; // here's the trick
+         const dist = paddle.y - state.ball.y;
+         state.ball.yv += dist * -1; // here's the trick
          state.ball.xv *= -1.08;
          paddle.height -= 50;
          if (paddle.height < paddle.width) {
@@ -113,8 +113,7 @@ module.exports = function simulate(oldState, inputs) {
          (paddle.x > CANVAS_WIDTH / 2 && state.ball.x + state.ball.radius > CANVAS_WIDTH + 500)
       ) {
          state.won = true;
-         const otherPaddleId = Object.keys(state.scores).find((id) => id !== paddleId);
-         state.scores[otherPaddleId]++;
+         state.scores[paddleId]++;
          state.ball.x = CANVAS_WIDTH / 2;
          state.ball.y = CANVAS_HEIGHT / 2;
          if (state.ball.x + state.ball.radius < -500) {

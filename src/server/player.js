@@ -8,7 +8,6 @@ module.exports = class Player {
          client.username ||
          `Guest ${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}`;
       this.ready = false;
-      this.wins = 0;
    }
    pack() {
       return {

@@ -7,14 +7,12 @@ const initialState = require('./initialState.json');
 const simulate = require('../shared/simulate.js');
 const copy = require('../shared/copy.js');
 
-function parseState(data, players) {
+function parseState(data, paddleIds) {
    const state = Object.create(null);
-   const paddleIds = Object.keys(players);
    state.paddles = {};
    if (data.paddles) {
       for (let i = 0; i < data.paddles.length; i++) {
          state.paddles[paddleIds[i]] = data.paddles[i];
-         state.paddles[paddleIds[i]].name = players[paddleIds[i]].name;
          state.paddles[paddleIds[i]].accel = { x: 0, y: 0 };
       }
    }
@@ -50,7 +48,7 @@ module.exports = class Room {
       this.update = false;
       this.sendPackage = {};
       this.tick = 0;
-      this.startTime = Date.now();
+      this.startTime = null;
       this.receivedInputs = [];
       this.states = [];
       this.inputs = [];
@@ -105,9 +103,12 @@ module.exports = class Room {
       this.pendingPrivateMessages = [];
       this.sendPackage = {};
    }
+   get playerIds() {
+      return Object.keys(this.players);
+   }
    createEmptyInputs() {
       const input = {};
-      Object.keys(this.players).forEach((id) => {
+      this.playerIds.forEach((id) => {
          input[id] = { up: false, down: false };
       });
       return input;
@@ -122,7 +123,7 @@ module.exports = class Room {
          this.countdown = COUNTDOWN;
          this.startTime = Date.now();
          this.tick = 0;
-         this.states = [{ ...parseState(initialState, this.players) }];
+         this.states = [{ ...parseState(initialState, [...this.playerIds]) }];
          this.inputs = [{ ...this.createEmptyInputs() }];
          this.receivedInputs = [];
          this.sendPackage['change'] = 'game';
@@ -195,19 +196,11 @@ module.exports = class Room {
                      }
                      this.update = true;
                      const noobPlayer = this.players[Object.keys(scores).find((key) => scores[key] !== score)];
-                     noobPlayer.wins++;
                      this.talk(
                         'SERVER',
-                        `${this.players[id].name} has won the game! ${noobPlayer.name} is noob. Score: ${score} - ${
+                        `${noobPlayer.name} has won the game! ${this.players[id].name} is noob. Score: ${score} - ${
                            scores[noobPlayer.id]
                         } `
-                     );
-                     this.talk(
-                        'SERVER',
-                        `Wins:${Object.values(this.players).reduce(
-                           (acc, player) => acc + `<br>	- ${player.name}: ${player.wins} wins`,
-                           ''
-                        )}`
                      );
                      break;
                   }
