@@ -19,6 +19,13 @@ module.exports = function Render({ game, ctx, canvas }) {
       ctx.textBaseline = 'middle';
       ctx.globalAlpha = Math.max(0, game.countdownAlpha + 0.5);
       ctx.fillText(`${game.countdown <= 0 ? 'GO!' : Math.ceil(game.countdown)}`, canvas.width / 2, canvas.height / 4);
+      drawVs({
+         ctx,
+         canvas,
+         name1: Object.values(game.state().paddles).find((paddle) => paddle.x < canvas.width / 2)?.name,
+         name2: Object.values(game.state().paddles).find((paddle) => paddle.x > canvas.width / 2)?.name,
+         game,
+      });
       ctx.globalAlpha = 1;
    }
    if (game.state() !== undefined) {
@@ -30,6 +37,15 @@ module.exports = function Render({ game, ctx, canvas }) {
       }
    }
 };
+
+// vs screen box with the names
+function drawVs({ ctx, canvas, name1, name2, game }) {
+   if (game.countdown <= 0) return;
+   ctx.textAlign = 'center';
+   ctx.textBaseline = 'middle';
+   ctx.font = '55px Lexend';
+   ctx.fillText(`${name1} vs ${name2}`, canvas.width / 2, canvas.height / 2 - 100);
+}
 
 function drawChat({ ctx, canvas }) {
    ctx.fillStyle = 'white';
