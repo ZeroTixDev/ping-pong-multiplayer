@@ -62,6 +62,7 @@ module.exports = function Update(game) {
             game.countdown = 0;
             game.countdownAlpha -= delta;
          }
+         console.log('updating countdown');
       }
       if (!onCountdown) {
          game.states[game.tick + 1] = simulate(game.states[game.tick], game.inputs[game.tick]);
