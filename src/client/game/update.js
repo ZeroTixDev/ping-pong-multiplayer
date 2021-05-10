@@ -51,7 +51,7 @@ module.exports = function Update(game) {
    game.pendingInputs = [];
 
    const inputPackages = [];
-   console.log(game.tick, expectedTick);
+   console.log(game.tick, expectedTick); // omg its negative
    while (game.tick < expectedTick) {
       let onCountdown = false;
       if (game.countdown !== undefined) {
@@ -63,7 +63,7 @@ module.exports = function Update(game) {
             game.countdownAlpha -= delta;
          }
       }
-      console.log('onCountdown', onCountdown);
+      // console.log('onCountdown', onCountdown);
       if (!onCountdown) {
          game.states[game.tick + 1] = simulate(game.states[game.tick], game.inputs[game.tick]);
          if (game.inputs[game.tick + 1] === undefined) {
