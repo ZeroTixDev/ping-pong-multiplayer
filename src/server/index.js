@@ -10,7 +10,7 @@ const Room = require('./room.js');
 const Loop = require('accurate-game-loop');
 
 const wss = new WebSocket.Server({ noServer: true });
-const tickRate = 60;
+const tickRate = 120;
 const app = express();
 const PORT = process.env.PORT || 8080;
 const server = app.listen(PORT, () => console.log(`[Server]: Listening on ${PORT} v2`));
@@ -65,16 +65,12 @@ wss.on('connection', (socket, _request) => {
 // room update loop
 new Loop(() => {
    RoomUpdate();
-}, 1).start();
+}, 10).start();
 //game loop
-new Loop(
-   () => {
-      Update();
-      Send();
-   },
-   tickRate,
-   { dif_log: true }
-).start();
+new Loop(() => {
+   Update();
+   Send();
+}, tickRate).start();
 
 function RoomUpdate() {
    if (!state.roomChange && !state.roomUpdated) return;

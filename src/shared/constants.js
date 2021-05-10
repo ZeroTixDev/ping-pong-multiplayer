@@ -9,7 +9,7 @@ module.exports = {
    PADDLE_FRICTION: 0.89,
    SPEED: 90,
    BALL_MAX_SPEED: 1000,
-   INPUT_DECAY: 0.96,
+   INPUT_DECAY: 0.97,
    POINTS_TO_WIN: 3,
    SMOOTHING_RATE: 15,
    phrases: {
