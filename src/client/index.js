@@ -279,6 +279,7 @@ function serverMessage(msg, t) {
          ref.game.classList.remove('hidden');
          ref.chat.classList.add('hidden');
          state = 'game';
+         console.log('going into the game.');
          window.currentInput = { up: false, down: false };
          window.lastInput = { up: false, down: false };
          window.gameState = {
@@ -317,6 +318,7 @@ function serverMessage(msg, t) {
       window.gameState.tick = 0;
       window.gameState.countdownAlpha = 1;
       window.gameState.countdown = COUNTDOWN; // msg countdown refers to the date.now on which server sent
+      console.log('starting game simulation...');
    }
    if (msg.initState !== undefined) {
       window.gameState.hasInitState = true;
