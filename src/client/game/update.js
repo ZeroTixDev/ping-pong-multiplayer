@@ -51,7 +51,7 @@ module.exports = function Update(game) {
    game.pendingInputs = [];
 
    const inputPackages = [];
-
+   console.log(game.tick);
    while (game.tick < expectedTick) {
       let onCountdown = false;
       if (game.countdown !== undefined) {
