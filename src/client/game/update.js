@@ -51,6 +51,7 @@ module.exports = function Update(game) {
    game.pendingInputs = [];
 
    const inputPackages = [];
+   console.log('inside update fn');
 
    while (game.tick < expectedTick) {
       let onCountdown = false;
@@ -63,6 +64,8 @@ module.exports = function Update(game) {
             game.countdownAlpha -= delta;
          }
          console.log('updating countdown');
+      } else {
+         console.log('game.countdown undefined ?', game.countdown);
       }
       if (!onCountdown) {
          game.states[game.tick + 1] = simulate(game.states[game.tick], game.inputs[game.tick]);
