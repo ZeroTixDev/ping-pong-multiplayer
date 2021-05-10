@@ -302,6 +302,7 @@ function serverMessage(msg, t) {
          ref.game.classList.add('hidden');
          ref.chat.classList.remove('hidden');
          ref.readyButton.classList.remove('button-disable');
+         ref.chatMessages.scrollTop = ref.chatMessages.scrollHeight - ref.chatMessages.clientHeight;
          state = 'chat';
          window.gameState = null;
          endGame();

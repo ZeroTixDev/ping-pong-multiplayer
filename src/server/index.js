@@ -67,10 +67,14 @@ new Loop(() => {
    RoomUpdate();
 }, 1).start();
 //game loop
-new Loop(() => {
-   Update();
-   Send();
-}, tickRate).start();
+new Loop(
+   () => {
+      Update();
+      Send();
+   },
+   tickRate,
+   { dif_log: true }
+).start();
 
 function RoomUpdate() {
    if (!state.roomChange && !state.roomUpdated) return;
@@ -183,12 +187,7 @@ function newMessage({ data, id }) {
          }
       }
    }
-   if (
-      data.type === 'create-room' &&
-      client.state === 'game-menu' &&
-      validRoomData(data) &&
-      !whiteSpaceTest(data.username)
-   ) {
+   if (data.type === 'create-room' && client.state === 'game-menu') {
       const room = addRoom({
          name: removeTags(data.name),
          desc: removeTags(data.desc),
@@ -208,11 +207,11 @@ function removeTags(string) {
    return string.replace(/\>/g, '').replace(/\</g, '');
 }
 
-function validRoomData(data) {
-   if (!whiteSpaceTest(data.name)) return false;
-   if (!whiteSpaceTest(data.desc)) return false;
-   return true;
-}
+// function validRoomData(data) {
+//    if (!whiteSpaceTest(data.name)) return false;
+//    if (!whiteSpaceTest(data.desc)) return false;
+//    return true;
+// }
 
 function whiteSpaceTest(string) {
    return /\S/.test(string) && /\u202E/.test(string);
