@@ -50,7 +50,7 @@ module.exports = class Room {
       this.update = false;
       this.sendPackage = {};
       this.tick = 0;
-      this.startTime = present();
+      this.startTime = global.present();
       this.receivedInputs = [];
       this.states = [];
       this.inputs = [];
@@ -120,7 +120,7 @@ module.exports = class Room {
       if (this.readyCount === this.maxPlayers && this.state !== 'game' && !this.toDelete) {
          this.state = 'game';
          this.countdown = COUNTDOWN;
-         this.startTime = present();
+         this.startTime = global.present();
          this.tick = 0;
          this.states = [{ ...parseState(initialState, this.players) }];
          this.inputs = [{ ...this.createEmptyInputs() }];
@@ -149,7 +149,7 @@ module.exports = class Room {
       return input1.up === input2.up && input1.down === input2.down;
    }
    gameUpdate() {
-      const expectedTick = Math.ceil((present() - this.startTime) / (1000 / SIMULATION_RATE));
+      const expectedTick = Math.ceil((global.present() - this.startTime) / (1000 / SIMULATION_RATE));
       const delta = 1 / SIMULATION_RATE;
 
       if (this.receivedInputs.length > 0) {

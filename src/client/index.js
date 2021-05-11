@@ -18,7 +18,7 @@ window.game = null;
 window.gameState = null;
 window.dateTime = DateTime;
 window.time = () => {
-   return window.dateTime.now().ts;
+   return window.dateTime.utc().ts;
 };
 window.currentInput = { up: false, down: false };
 window.lastInput = { up: false, down: false };

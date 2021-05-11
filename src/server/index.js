@@ -36,8 +36,9 @@ const clients = Object.create(null);
 
 const state = State();
 
+global.dateTime = DateTime;
 global.present = () => {
-   return DateTime.now().ts;
+   return global.dateTime.utc().ts;
 };
 
 // eslint-disable-next-line no-unused-vars
