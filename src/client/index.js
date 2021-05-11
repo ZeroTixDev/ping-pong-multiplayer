@@ -9,12 +9,17 @@ const resize = require('./util/resize.js');
 const Game = require('./game/game.js');
 const { COUNTDOWN, controls } = require('../shared/constants.js');
 const copy = require('../shared/copy.js');
+const { DateTime } = require('luxon');
 
 let rooms = null;
 let roomId = null;
 window.selfId = null;
 window.game = null;
 window.gameState = null;
+window.dateTime = DateTime;
+window.time = () => {
+   return window.dateTime.now().ts;
+};
 window.currentInput = { up: false, down: false };
 window.lastInput = { up: false, down: false };
 let state = null; // THIS IS NULL
@@ -230,7 +235,7 @@ function serverMessage(msg, t) {
       if (pings.length > 10) {
          pings.shift();
       }
-      pings.push(Date.now() - msg.ping);
+      pings.push(time() - msg.ping);
       ref.pingText.innerText = `${Math.round(pings.reduce((a, b) => a + b) / pings.length)}`;
    }
    if (msg.type === 'my-room-update') {
@@ -520,7 +525,7 @@ async function handleNetworkRequestsAndText() {
                });
             });
             setInterval(() => {
-               send({ ping: Date.now() });
+               send({ ping: time() });
             }, 1000 / pingAmount);
          });
       });

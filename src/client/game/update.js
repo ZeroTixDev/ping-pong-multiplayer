@@ -19,27 +19,13 @@ module.exports = function Update(game) {
       return { game, ctx, canvas };
    }
 
-   const expectedTick = Math.ceil((Date.now() - game.startTime) / (1000 / SIMULATION_RATE));
+   const expectedTick = Math.ceil((time() - game.startTime) / (1000 / SIMULATION_RATE));
    const delta = 1 / SIMULATION_RATE;
 
    const input = copy(window.currentInput);
    if (game.ticksSent === undefined) {
       game.ticksSent = {};
    }
-
-   // if (!sameInput(input, copy(window.lastInput))) {
-   //    send({
-   //       inputs: [
-   //          {
-   //             tick: game.tick,
-   //             input,
-   //          },
-   //       ],
-   //    });
-   //    game.inputs[game.tick][window.selfId] = input;
-   // }
-
-   // window.lastInput = copy(input);
 
    game.poll().forEach((data) => {
       if (game.inputs[data.tick] === undefined) {
@@ -51,7 +37,6 @@ module.exports = function Update(game) {
    game.pendingInputs = [];
 
    const inputPackages = [];
-   console.log(game.tick, expectedTick); // omg its negative
    while (game.tick < expectedTick) {
       let onCountdown = false;
       if (game.countdown !== undefined) {

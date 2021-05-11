@@ -8,6 +8,7 @@ const Client = require('./client.js');
 const State = require('./state.js');
 const Room = require('./room.js');
 const Loop = require('accurate-game-loop');
+const { DateTime } = require('luxon');
 
 const wss = new WebSocket.Server({ noServer: true });
 const tickRate = 120;
@@ -34,6 +35,10 @@ app.use(express.static('dist'));
 const clients = Object.create(null);
 
 const state = State();
+
+global.present = () => {
+   return DateTime.now().ts;
+};
 
 // eslint-disable-next-line no-unused-vars
 wss.on('connection', (socket, _request) => {
