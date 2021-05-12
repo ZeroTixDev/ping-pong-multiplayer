@@ -38,7 +38,7 @@ const state = State();
 
 global.dateTime = DateTime;
 global.present = () => {
-   return global.dateTime.utc().ts;
+   return global.dateTime.now().ts;
 };
 
 // eslint-disable-next-line no-unused-vars
