@@ -318,9 +318,10 @@ function serverMessage(msg, t) {
          ref.menu.classList.remove('hidden');
       }
    }
-   if (msg.start !== undefined && msg.serverOffset !== undefined) {
+   if (msg.start !== undefined && msg.serverDate !== undefined) {
       const localOffset = 60 * 1000 * new Date().getTimezoneOffset();
-      window.gameState.startTime = new Date(msg.start - msg.serverOffset + localOffset).getTime();
+      const serverOffset = 60 * 1000 * new Date(msg.serverDate).getTimezoneOffset();
+      window.gameState.startTime = new Date(new Date(msg.serverDate).getTime() - serverOffset + localOffset).getTime();
       window.gameState.tick = 0;
       window.gameState.countdownAlpha = 1;
       window.gameState.countdown = COUNTDOWN; // msg countdown refers to the date.now on which server sent
