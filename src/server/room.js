@@ -127,6 +127,7 @@ module.exports = class Room {
          this.receivedInputs = [];
          this.sendPackage['change'] = 'game';
          this.sendPackage['start'] = this.startTime;
+         this.sendPackage['serverOffset'] = 60 * 1000 * new Date().getTimezoneOffset();
          this.sendPackage['initState'] = this.states[0];
          this.sendPackage['initInput'] = this.inputs[0];
       }

@@ -9,16 +9,16 @@ const resize = require('./util/resize.js');
 const Game = require('./game/game.js');
 const { COUNTDOWN, controls } = require('../shared/constants.js');
 const copy = require('../shared/copy.js');
-const { DateTime } = require('luxon');
+// const { DateTime } = require('luxon');
 
 let rooms = null;
 let roomId = null;
 window.selfId = null;
 window.game = null;
 window.gameState = null;
-window.dateTime = DateTime;
+// window.dateTime = DateTime;
 window.time = () => {
-   return window.dateTime.utc().ts;
+   return new Date().getTime();
 };
 window.currentInput = { up: false, down: false };
 window.lastInput = { up: false, down: false };
@@ -318,8 +318,9 @@ function serverMessage(msg, t) {
          ref.menu.classList.remove('hidden');
       }
    }
-   if (msg.start !== undefined) {
-      window.gameState.startTime = msg.start;
+   if (msg.start !== undefined && msg.serverOffset !== undefined) {
+      const localOffset = 60 * 1000 * new Date().getTimezoneOffset();
+      window.gameState.startTime = new Date(msg.start - msg.serverOffset + localOffset).getTime();
       window.gameState.tick = 0;
       window.gameState.countdownAlpha = 1;
       window.gameState.countdown = COUNTDOWN; // msg countdown refers to the date.now on which server sent
