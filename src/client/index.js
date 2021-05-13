@@ -320,7 +320,7 @@ function serverMessage(msg, t) {
    }
    if (msg.start !== undefined && msg.serverDate !== undefined) {
       const localOffset = 60 * 1000 * new Date().getTimezoneOffset();
-      const serverOffset = 60 * 1000 * new Date(msg.serverDate).getTimezoneOffset();
+      const serverOffset = 60 * 1000 * msg.serverOffset;
       window.gameState.startTime = new Date(msg.serverTime - serverOffset + localOffset).getTime();
       window.gameState.tick = 0;
       window.gameState.countdownAlpha = 1;
