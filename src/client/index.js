@@ -321,7 +321,7 @@ function serverMessage(msg, t) {
    if (msg.start !== undefined && msg.serverDate !== undefined) {
       const localOffset = 60 * 1000 * new Date().getTimezoneOffset();
       const serverOffset = 60 * 1000 * msg.serverOffset;
-      window.gameState.startTime = new Date(msg.serverTime - serverOffset + localOffset).getTime();
+      window.gameState.startTime = new Date(new Date(msg.serverDate).getTime() - serverOffset + localOffset).getTime();
       console.log(
          new Date(msg.serverDate).toISOString(),
          new Date().toISOString(),
