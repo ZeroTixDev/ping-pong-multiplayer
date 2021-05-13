@@ -322,7 +322,7 @@ function serverMessage(msg, t) {
       const localOffset = 60 * 1000 * new Date().getTimezoneOffset();
       const serverOffset = 60 * 1000 * msg.serverOffset;
       window.gameState.startTime = new Date(msg.serverTime - serverOffset + localOffset).getTime();
-      console.log(new Date(msg.serverDate).toISOString(), new Date().toIsoString());
+      console.log(new Date(msg.serverDate).toISOString(), new Date().toISOString());
       window.gameState.tick = 0;
       window.gameState.countdownAlpha = 1;
       window.gameState.countdown = COUNTDOWN; // msg countdown refers to the date.now on which server sent
