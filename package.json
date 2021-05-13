@@ -11,7 +11,8 @@
     "prod-client": "webpack --config config/webpack.prod.js --watch",
     "dev": "npm-run-all --parallel server dev-client",
     "dev-client": "webpack --config config/webpack.dev.js --watch",
-    "push": "webpack --config config/webpack.prod.js && git add ."
+    "pack": "webpack --config config/webpack.prod.js && git add .",
+    "push": "git push origin master && git push heroku master"
   },
   "keywords": [],
   "author": "ZeroTix",
