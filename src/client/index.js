@@ -10,8 +10,9 @@ const Game = require('./game/game.js');
 const { COUNTDOWN, controls } = require('../shared/constants.js');
 const copy = require('../shared/copy.js');
 const { loadSound } = require('./sounds.js');
-// const { DateTime } = require('luxon');
-
+const moment = require('moment');
+window.moment = moment;
+const utc = window.moment.utc;
 let rooms = null;
 let roomId = null;
 window.chatSound = loadSound('chat.wav');
@@ -22,7 +23,7 @@ window.gameState = null;
 window.debugMode = false;
 // window.dateTime = DateTime;
 window.time = () => {
-   return new Date().getTime();
+   return utc().unix() * 1000 + utc().milliseconds();
 };
 window.currentInput = { up: false, down: false };
 window.lastInput = { up: false, down: false };
@@ -263,6 +264,7 @@ function serverMessage(msg, t) {
       if (roomData.readyCount !== undefined) {
          console.log('changed readycount to', roomData.readyCount);
          game.readyCount = roomData.readyCount;
+         window.chatSound.play();
          ref.readyCounter.innerText = `${game.readyCount} / ${game.maxPlayers}`;
       }
       ref.playerCount.innerText = `${roomData.playerCount} / ${roomData.maxPlayers}`;
@@ -326,7 +328,7 @@ function serverMessage(msg, t) {
       }
    }
    if (msg.start !== undefined) {
-      window.gameState.startTime = new Date(msg.serverDate).getTime();
+      window.gameState.startTime = msg.startTime;
       window.gameState.tick = 0;
       window.gameState.countdownAlpha = 1;
       window.gameState.countdown = COUNTDOWN; // msg countdown refers to the date.now on which server sent

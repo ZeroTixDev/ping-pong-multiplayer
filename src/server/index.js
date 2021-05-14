@@ -8,14 +8,13 @@ const Client = require('./client.js');
 const State = require('./state.js');
 const Room = require('./room.js');
 const Loop = require('accurate-game-loop');
-// const { DateTime } = require('luxon');
+const { utc } = require('moment');
 
 const wss = new WebSocket.Server({ noServer: true });
 const tickRate = 120;
 const app = express();
 const PORT = process.env.PORT || 8080;
 const server = app.listen(PORT, () => console.log(`[Server]: Listening on ${PORT} v2`));
-console.log('server timezone offset', new Date().getTimezoneOffset());
 
 app.get('/', (request, result) => {
    result.sendFile(path.join(__dirname, '../../dist/index.html'));
@@ -40,7 +39,7 @@ const state = State();
 // global.dateTime = DateTime;
 global.present = () => {
    // return global.dateTime.now().ts;
-   return new Date().getTime();
+   return utc().unix() * 1000 + utc().milliseconds();
 };
 
 // eslint-disable-next-line no-unused-vars
