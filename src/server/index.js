@@ -8,7 +8,8 @@ const Client = require('./client.js');
 const State = require('./state.js');
 const Room = require('./room.js');
 const Loop = require('accurate-game-loop');
-const { utc } = require('moment');
+const moment = require('moment');
+const { utc } = moment;
 
 const wss = new WebSocket.Server({ noServer: true });
 const tickRate = 120;
@@ -37,11 +38,13 @@ const clients = Object.create(null);
 const state = State();
 
 // global.dateTime = DateTime;
+
 global.present = () => {
    // return global.dateTime.now().ts;
    return utc().unix() * 1000 + utc().milliseconds();
 };
 
+console.log(moment.now() - global.present());
 // eslint-disable-next-line no-unused-vars
 wss.on('connection', (socket, _request) => {
    const clientId = uniqueId(Object.keys(clients));
