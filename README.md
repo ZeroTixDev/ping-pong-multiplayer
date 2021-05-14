@@ -5,6 +5,7 @@
 ## Move: WASD or Arrow keys
 ## Forfeit: O 
 ## Quickchat: F (1 - 9)
+## Debug Mode: G to toggle
 # Networking
 ## Results: 
 ### Pros: The game responds to inputs immediately (client prediction) regardless of the internet connection quality between the client and the game server. The ball is predicted but the server is authoriative of it. Client has no input delay and super low bandwidth and smooths the corrections.

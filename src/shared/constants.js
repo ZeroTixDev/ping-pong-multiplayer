@@ -30,6 +30,7 @@ module.exports = {
       ArrowDown: { movement: true, name: 'down' },
       KeyO: { forfeit: true },
       KeyF: { gamechat: true },
+      KeyG: { debugmode: true },
       Digit1: { gameChatDigit: 1 },
       Digit2: { gameChatDigit: 2 },
       Digit3: { gameChatDigit: 3 },

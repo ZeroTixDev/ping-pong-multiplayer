@@ -18,7 +18,11 @@ module.exports = function Render({ game, ctx, canvas }) {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.globalAlpha = Math.max(0, game.countdownAlpha + 0.5);
-      ctx.fillText(`${game.countdown <= 0 ? 'GO!' : Math.ceil(game.countdown)}`, canvas.width / 2, canvas.height / 4);
+      ctx.fillText(
+         `${game.countdown <= 0 ? 'GO!' : window.debugMode ? game.countdown.toFixed(2) : Math.ceil(game.countdown)}`,
+         canvas.width / 2,
+         canvas.height / 4
+      );
       drawVs({
          ctx,
          canvas,
@@ -29,8 +33,8 @@ module.exports = function Render({ game, ctx, canvas }) {
       ctx.globalAlpha = 1;
    }
    if (game.state() !== undefined) {
-      drawBall(game.renderState.ball, { ctx });
-      drawPaddles(game.renderState.paddles, game.countdown <= 0, { ctx });
+      drawBall(game, { ctx });
+      drawPaddles(game, game.countdown <= 0, { ctx });
       drawScore(Object.values(game.state().scores)[0], Object.values(game.state().scores)[1], { ctx, canvas });
       if (game.onChat) {
          drawChat({ ctx, canvas });
@@ -63,14 +67,26 @@ function drawScore(score1, score2, { ctx, canvas }) {
    ctx.fillText(` ${score1} - ${score2} `, canvas.width / 2, 50);
 }
 
-function drawBall(ball, { ctx }) {
+function drawBall(game, { ctx }) {
+   const ball = game.renderState.ball;
+   const actualBall = game.state().ball;
    ctx.fillStyle = '#DC9306';
    ctx.beginPath();
    ctx.arc(round(ball.x), round(ball.y), ball.radius, 0, Math.PI * 2);
    ctx.fill();
+   if (window.debugMode) {
+      ctx.fillStyle = 'red';
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath();
+      ctx.arc(round(actualBall.x), round(actualBall.y), actualBall.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+   }
 }
 
-function drawPaddles(paddles, countdownEnded, { ctx }) {
+function drawPaddles(game, countdownEnded, { ctx }) {
+   const paddles = game.renderState.paddles;
+   const actualPaddles = game.state().paddles;
    ctx.fillStyle = '#14cccc';
    for (const id of Object.keys(paddles)) {
       const paddle = paddles[id];
@@ -82,6 +98,19 @@ function drawPaddles(paddles, countdownEnded, { ctx }) {
          round(paddle.height),
          5
       ).fill();
+      if (window.debugMode) {
+         ctx.fillStyle = 'red';
+         ctx.globalAlpha = 0.5;
+         const actualPaddle = actualPaddles[id];
+         ctx.roundRect(
+            round(actualPaddle.x - actualPaddle.width / 2),
+            round(actualPaddle.y - actualPaddle.height / 2),
+            round(actualPaddle.width),
+            round(actualPaddle.height),
+            5
+         ).fill();
+         ctx.globalAlpha = 1;
+      }
       if (paddle.text !== undefined) {
          ctx.textAlign = 'center';
          ctx.textBaseline = 'middle';
@@ -108,4 +137,8 @@ CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
    this.arcTo(x, y, x + w, y, r);
    this.closePath();
    return this;
+};
+CanvasRenderingContext2D.prototype.fillStroke = function () {
+   this.fill();
+   this.stroke();
 };

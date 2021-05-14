@@ -15,6 +15,7 @@ const tickRate = 120;
 const app = express();
 const PORT = process.env.PORT || 8080;
 const server = app.listen(PORT, () => console.log(`[Server]: Listening on ${PORT} v2`));
+console.log('server timezone offset', new Date().getTimezoneOffset());
 
 app.get('/', (request, result) => {
    result.sendFile(path.join(__dirname, '../../dist/index.html'));

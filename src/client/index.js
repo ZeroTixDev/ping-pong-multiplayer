@@ -9,13 +9,17 @@ const resize = require('./util/resize.js');
 const Game = require('./game/game.js');
 const { COUNTDOWN, controls } = require('../shared/constants.js');
 const copy = require('../shared/copy.js');
+const { loadSound } = require('./sounds.js');
 // const { DateTime } = require('luxon');
 
 let rooms = null;
 let roomId = null;
+window.chatSound = loadSound('chat.wav');
+window.chatSound.volume = 0.2;
 window.selfId = null;
 window.game = null;
 window.gameState = null;
+window.debugMode = false;
 // window.dateTime = DateTime;
 window.time = () => {
    return new Date().getTime();
@@ -70,6 +74,9 @@ function trackKeys(event) {
       send({ type: 'game-chat', number: control.gameChatDigit });
       window.gameState.pendingChats.push({ id: window.selfId, number: control.gameChatDigit });
       window.gameState.onChat = false;
+   }
+   if (control.debugmode && event.type === 'keydown' && window.gameState !== null) {
+      window.debugMode = !window.debugMode;
    }
 }
 
@@ -318,15 +325,8 @@ function serverMessage(msg, t) {
          ref.menu.classList.remove('hidden');
       }
    }
-   if (msg.start !== undefined && msg.serverDate !== undefined) {
-      const localOffset = 60 * 1000 * new Date().getTimezoneOffset();
-      const serverOffset = 60 * 1000 * msg.serverOffset;
-      window.gameState.startTime = new Date(new Date(msg.serverDate).getTime() - serverOffset + localOffset).getTime();
-      console.log(
-         new Date(msg.serverDate).toISOString(),
-         new Date().toISOString(),
-         msg.serverTime - (msg.serverTime - serverOffset + localOffset)
-      );
+   if (msg.start !== undefined) {
+      window.gameState.startTime = new Date(msg.serverDate).getTime();
       window.gameState.tick = 0;
       window.gameState.countdownAlpha = 1;
       window.gameState.countdown = COUNTDOWN; // msg countdown refers to the date.now on which server sent
@@ -357,6 +357,7 @@ function serverMessage(msg, t) {
    }
    if (msg.type === 'chat-update') {
       const messages = msg.messages;
+      const playedSound = false;
       for (const { author, content } of messages) {
          ref.chatMessages.innerHTML += `
          <div class="chat-message">
@@ -366,6 +367,9 @@ function serverMessage(msg, t) {
          	<span class="message">${content}</span>
          </div>
          `;
+         if (author !== selfId && !playedSound) {
+            window.chatSound.play();
+         }
       }
       ref.chatMessages.scrollTop = ref.chatMessages.scrollHeight - ref.chatMessages.clientHeight;
    }
