@@ -328,6 +328,7 @@ function serverMessage(msg, t) {
       }
    }
    if (msg.start !== undefined) {
+      console.log('difference/amount of time it took to get to client', time() - msg.startTime);
       window.gameState.startTime = msg.startTime;
       window.gameState.tick = 0;
       window.gameState.countdownAlpha = 1;
