@@ -127,7 +127,7 @@ module.exports = class Room {
          this.receivedInputs = [];
          this.sendPackage['change'] = 'game';
          this.sendPackage['start'] = true;
-         this.sendPackage['startTime'] = this.startTime;
+         this.sendPackage['startTime'] = Number(global.format());
          this.sendPackage['initState'] = this.states[0];
          this.sendPackage['initInput'] = this.inputs[0];
       }

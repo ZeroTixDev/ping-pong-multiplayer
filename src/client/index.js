@@ -328,8 +328,11 @@ function serverMessage(msg, t) {
       }
    }
    if (msg.start !== undefined) {
-      console.log('difference/amount of time it took to get to client', time() - msg.startTime);
-      window.gameState.startTime = msg.startTime;
+      console.log(
+         'difference/amount of time it took to get to client',
+         time() - (utc(msg.startTime).unix() * 1000 + utc(msg.startTime).milliseconds())
+      );
+      window.gameState.startTime = utc(msg.startTime).unix() * 1000 + utc(msg.startTime).milliseconds();
       window.gameState.tick = 0;
       window.gameState.countdownAlpha = 1;
       window.gameState.countdown = COUNTDOWN; // msg countdown refers to the date.now on which server sent

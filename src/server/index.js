@@ -44,6 +44,10 @@ global.present = () => {
    return utc().unix() * 1000 + utc().milliseconds();
 };
 
+global.format = () => {
+   return utc().format('x');
+};
+
 // console.log(moment.now() - global.present(), 'difference between now and present');
 // eslint-disable-next-line no-unused-vars
 wss.on('connection', (socket, _request) => {
